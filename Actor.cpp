@@ -72,14 +72,11 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
 
 void Actor::PrintHelp( uint8_t eventID )
 {
-    char prefix[] = "   ";
-    prefix[ 2 ] = (char) eventID;
-
-    Serial.print( prefix );
+    Serial.print( "  " ); Serial.print( (char) eventID );
     Serial.println( F( "0: Disable" ) );
-    Serial.print( prefix );
+    Serial.print( "  " ); Serial.print( (char) eventID );
     Serial.println( F( "1: Enable" ) );
-//    Serial.print( prefix );
+    Serial.print( "  " ); Serial.print( (char) eventID );
     Serial.println( F( "V <level> : Set verbosity level" ) );
 }
 
