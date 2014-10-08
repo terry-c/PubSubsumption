@@ -30,17 +30,17 @@ CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD, float IPS2T
 // if we were not already cruising, but have just assumed control (i.e., no other
 // behavior has asserted itself this interval), note the Position readings so 
 // we can maintain our heading by keeping the same differential.
-void CruiseControl::handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams )
+void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
     // nothing to do if we're not enabled
     if ( _bEnabled ) {
-        MotorParams* pMotorParams = (MotorParams*) pEvent->pData;
+        ControlParams* pControlParams = (ControlParams*) pEvent->pData;
 
-        if ( NULL != pMotorParams->_pTakenBy ) {
+        if ( NULL != pControlParams->ActorInControl() ) {
             _bCruising = false;
         }
         else {  // nobody else cares, so it's our turn
-            pMotorParams->_pTakenBy = this;
+            pControlParams->ControlledBy( this );
 
             if ( _bCruising ) {    // this means we were already cruising
                 // check our position and calculate error values
@@ -66,7 +66,7 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, MotorParams* 
                 _throttleRight += ( ( _kP * errorRight ) + ( _kI * cumulativeErrorRight ) + ( _kD * deltaErrorRight ) );
 
                 // Show our work
-                if ( _verbosityLevel >= 2 ) {
+                if ( _messageMask & MM_PROGRESS ) {
                     Serial.println( F( "\nCruise Control PID calc:" ) );
                     PRINT_VAR( _idealPositionLeft );
                     PRINT_VAR( _pPosition->_currentEncoderPositionLeft );
@@ -78,6 +78,23 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, MotorParams* 
                     PRINT_VAR( _kI * cumulativeErrorLeft );
                 }
 
+/*
+                if ( _messageMask & MM_CSVBASIC && pControlParams->_csvState != ControlParams::eCsvIdle ) {
+                    if ( pControlParams->PrintingCsvHeadings() ) {
+                        Serial.print( F("_idealPositionLeft,_pPosition->_currentEncoderPositionLeft,_prevPositionLeft,deltaLeft,_targetSpeedTicks,errorLeft,cumulativeErrorLeft,_kI * cumulativeErrorLeft,") );
+                    }
+                    else {
+                        Serial.print( _idealPositionLeft );                        Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( _pPosition->_currentEncoderPositionLeft );   Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( _prevPositionLeft );                         Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( deltaLeft );                                 Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( _targetSpeedTicks );                         Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( errorLeft );                                 Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( cumulativeErrorLeft );                       Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( _kI * cumulativeErrorLeft );                 Serial.print( pControlParams->_csvDelimiter );
+                   }
+                }
+*/
                 // Upsate some numbers for the next time
                 _prevErrorLeft = errorLeft;
                 _prevErrorRight = errorRight;
@@ -98,14 +115,28 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, MotorParams* 
             _idealPositionRight += _targetSpeedTicks;
 
             // set the throttle positions.
-            pMotorParams->_throttleLeft = _throttleLeft;
-            pMotorParams->_throttleRight = _throttleRight;
+            pControlParams->SetThrottles( _throttleLeft, _throttleRight );
 
             //Serial.print( F( "Throttles set to: " ) );
-            //Serial.print( pMotorParams->_throttleLeft );
+            //Serial.print( pControlParams->_throttleLeft );
             //Serial.print( '/' );
-            //Serial.println( pMotorParams->_throttleRight );
+            //Serial.println( pControlParams->_throttleRight );
         }
+    }
+    IF_CSV( MM_CSVBASIC ) {
+        CSV_OUT( _targetSpeedTicks );                      
+        CSV_OUT( _idealPositionLeft );                     
+        CSV_OUT( _prevPositionLeft );                      
+//        CSV_OUT( deltaLeft );                              
+//        CSV_OUT( errorLeft );                              
+//        CSV_OUT( cumulativeErrorLeft );                    
+//        CSV_OUT( _kI * cumulativeErrorLeft );              
+        CSV_OUT( _idealPositionRight );                     
+        CSV_OUT( _prevPositionRight );                      
+//        CSV_OUT( deltaRight );                              
+//        CSV_OUT( errorRight );                              
+//        CSV_OUT( cumulativeErrorRight );                    
+//        CSV_OUT( _kI * cumulativeErrorRight );              
     }
 }
 
@@ -121,10 +152,11 @@ void CruiseControl::handleCommandEvent( EventNotification* pEvent, CommandArgs* 
             // Speed is in IPS, calculate encoder ticks per interval and use this as the target speed
             _targetSpeedIPS = pData->fParams[ 0 ];
             _targetSpeedTicks = _IPS2Ticks * _targetSpeedIPS;
-            if ( _verbosityLevel >= 1 ) {
-                Serial.print( F( "Target IPS: " ) );
+            if ( _messageMask & MM_RESPONSES ) {
+                Serial.println( F( "\nCruise Speed set to:" ) );
+                Serial.print( F( " IPS:\t" ) );
                 Serial.println( _targetSpeedIPS );
-                Serial.print( F( "Target Ticks: " ) );
+                Serial.print( F( " Ticks:\t" ) );
                 Serial.println( _targetSpeedTicks );
             }
             break;
@@ -132,7 +164,7 @@ void CruiseControl::handleCommandEvent( EventNotification* pEvent, CommandArgs* 
             _kP = pData->fParams[ 0 ];
             _kI = pData->fParams[ 1 ];
             _kD = pData->fParams[ 2 ];
-            if ( _verbosityLevel >= 1 ) {
+            if ( _messageMask & MM_RESPONSES ) {
                 Serial.println( F( "P\tI\tD" ) );
                 Serial.print( _kP ); Serial.print( '\t' );
                 Serial.print( _kI ); Serial.print( '\t' );
@@ -150,5 +182,20 @@ void CruiseControl::PrintHelp( uint8_t eventID )
     Serial.println( F( "\nCruise Control:" ) );
     Actor::PrintHelp( 'C' );
     Serial.println( F(  "  CS <Speed> : Set cruising speed (IPS)\n"
-                        "  CP <kP> <kI> <kD> : Set PID coefficients" ) );
+                        "  CP <kP> <kI> <kD> : Set PID coefficients" 
+                        ) );
+}
+
+
+void CruiseControl::PrintSpecificParameterValues()
+{
+    Serial.print( F( " Cruising Speed (IPS): " ) );
+    Serial.println( _targetSpeedIPS );
+
+    Serial.print( F( " PID:\t" ) );
+    Serial.print( _kP );
+    Serial.print( '\t' );
+    Serial.print( _kI );
+    Serial.print( '\t' );
+    Serial.println( _kD );
 }

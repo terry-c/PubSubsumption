@@ -13,19 +13,43 @@ Subsumption Architecture as described by David P. Anderson.
 #include <CommandDispatcher.h>
 #include <Actor.h>
 
-// MotorParams contains the motor control values which are passed through the Subsumption stack
+// ControlParams contains the motor control values which are passed through the Subsumption stack
 // and end up controlling the motors
-class MotorParams 
+class ControlParams 
 {
+    Actor*      _pTakenBy;  // pointer to the first subsumption layer which takes control
+
+    int         _throttleLeft;
+    int         _throttleRight;
+
+    /// CSV output control params
+    enum eCsvState { eCsvIdle, eCsvHeadings, eCsvData };
+
+    eCsvState   _csvState;
+    char        _csvDelimiter;
+
+
 public:
 
-    //float   LeftMotorSpeed;
-    //float   RightMotorSpeed;
+    ControlParams() : _throttleLeft( 0 ), _throttleRight( 0 ), _csvState( eCsvIdle ), _csvDelimiter( '\t' )                         {};
 
-    int     _throttleLeft;
-    int     _throttleRight;
+    void        ControlledBy( Actor* pActor )            { _pTakenBy = pActor; }
+    Actor*      ActorInControl()                        { return _pTakenBy; }
 
-    Actor*  _pTakenBy;  // pointer to the first subsumption layer which takes control
+    void        SetThrottles( int left, int right )     { _throttleLeft = left; _throttleRight = right; }
+    void        SetLeftThrottle( int left )             { _throttleLeft = left; }
+    void        SetRightThrottle( int right )           { _throttleRight = right; }
+    int         GetLeftThrottle()                       { return _throttleLeft; }
+    int         GetRightThrottle()                      { return _throttleRight; }
+
+    void        SetCsvDelimiter( char delimiter )       { _csvDelimiter = delimiter; }
+    char        GetCsvDelimiter()                       { return _csvDelimiter; }
+    bool        PrintingCsv()                           { return _csvState != eCsvIdle; }
+    bool        PrintingCsvHeadings()                   { return _csvState == eCsvHeadings; }
+    bool        PrintingCsvData()                       { return _csvState == eCsvData; }
+    void        PrintCsvHeadings()                      { _csvState = eCsvHeadings; }
+    void        PrintCsvData()                          { _csvState = eCsvData; }
+    void        StopCsvOutput()                         { _csvState = eCsvIdle; }
 };
 
 
@@ -38,11 +62,11 @@ class Director : public Publisher, public Actor
     bool            _bEnabled;
     bool            _bInhibit;
 
-    uint16_t   _intervalMS;
+    uint16_t        _intervalMS;
     unsigned long   _tickTimeMS;
 
-    // MotorParams object which is passed to all Behaviors through the Publisher's EventNotification.
-    MotorParams    motorParams;
+    // ControlParams object which is passed to all Behaviors through the Publisher's EventNotification.
+    ControlParams   _controlParams;
 
 public:
     // interval is the subsumption interval in ms.
@@ -59,6 +83,6 @@ public:
 //    virtual Subscriber* HandleEvent( EventNotification* pEvent );
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams ) {}  // these would come from the Director
+    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams ) {}  // these would come from the Director
 };
 

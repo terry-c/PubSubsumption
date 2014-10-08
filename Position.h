@@ -62,5 +62,5 @@ public:
 
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams );
+    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 };

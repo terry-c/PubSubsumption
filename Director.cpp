@@ -21,10 +21,7 @@ Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _
 
     _tickTimeMS = millis() + _intervalMS;
 
-    motorParams._throttleLeft = 0;
-    motorParams._throttleRight = 0;
-
-    notification.pData = &motorParams;
+    notification.pData = &_controlParams;
 
     SubscribeTo( pCD, 'D' );
 }
@@ -46,15 +43,24 @@ void Director::Update()
         _tickTimeMS += _intervalMS;
 
         if ( _bInhibit ) {
-            motorParams._throttleLeft = 0;
-            motorParams._throttleRight = 0;
-            motorParams._pTakenBy = (Actor*) this; // not thrilled with this cast.  The Actor* is used by LED's verbose output to indicate the currently-active actor.
+            _controlParams.SetThrottles( 0, 0 );
+            _controlParams.ControlledBy( this );
         }
         else {
             // reset the flag and send it down the line
-            motorParams._pTakenBy = NULL;
+            _controlParams.ControlledBy( NULL );
         }
         publish( _pFirstSubscriber, &notification );
+
+        // CSV state change.  If we've done headings, move on to data.
+        if ( _controlParams.PrintingCsvHeadings() ) {
+            _controlParams.PrintCsvData();
+        }
+
+        if ( _controlParams.PrintingCsv() ) {
+            Serial.println();
+        }
+
         digitalWrite( 13, LOW );
 //        Serial.println( millis() - ( _tickTimeMS - _intervalMS) );
     }
@@ -68,7 +74,9 @@ void Director::PrintHelp( uint8_t eventID )
     Actor::PrintHelp( 'D' );
     Serial.println( F(  "  DI <ms>: set interval ms\n"
                         "  DG : Go\n"
-                        "  DS : stop" ) );
+                        "  DL : Start CSV Logging\n"
+                        "  DS : stop"
+                        ) );
 }
 
 
@@ -77,21 +85,29 @@ void Director::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
     switch ( pArgs->inputBuffer[1] ) {
         case 'I' : // set interval
             _intervalMS = pArgs->nParams[0];
-            if ( _verbosityLevel >= 1 ) {
+            if ( _messageMask & MM_RESPONSES ) {
                 Serial.print( F( "Subsumption Interval milliseconds = " ) );
                 Serial.println( _intervalMS );
             }
             break;
         case 'S' :  // Stop -- inhibit all Actors
             _bInhibit = true;
-            if ( _verbosityLevel >= 1 ) {
+            _controlParams.StopCsvOutput();
+            if ( _messageMask & MM_RESPONSES ) {
                 Serial.println( F( "Director Stopped" ) );
             }
             break;
         case 'G' :  // Go -- allow Actors to act
             _bInhibit = false;
-            if ( _verbosityLevel >= 1 ) {
+            if ( _messageMask & MM_RESPONSES ) {
                 Serial.println( F( "Director Started" ) );
+            }
+            break;
+        case 'L' : // begin CSV logging
+            _controlParams.PrintCsvHeadings();
+            if ( _messageMask & MM_RESPONSES ) {
+                Serial.println( F( "Director Starting CSV data logging" ) );
+                Serial.println( F( "First, the CSV headings . . ." ) );
             }
             break;
     }

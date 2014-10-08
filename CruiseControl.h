@@ -79,7 +79,8 @@ public:
     CruiseControl( CommandDispatcher* pCD, Position* pOD, float IPS2Ticks );
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams );
+    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
     virtual void        PrintHelp( uint8_t eventID );
+    virtual void        PrintSpecificParameterValues();
 };

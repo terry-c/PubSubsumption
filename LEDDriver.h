@@ -38,13 +38,15 @@ class LEDDriver : public Actor
     float           _leftRatio;
     float           _rightRatio;
 
+    int             _throttleChangeLimit;
+
 public:
 
     LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin, CommandDispatcher* pCD, Position* pOD);
     void                Update( void );
 //    virtual Subscriber* HandleEvent(EventNotification* pEvent);
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams );
+    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
     virtual void        PrintHelp( uint8_t eventID );
 };

@@ -29,14 +29,17 @@ Position::Position( CommandDispatcher* pCD, Director* pD,
 void Position::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs )
 {
     switch( pArgs->inputBuffer[1] ) {
-        case 'R' : // no subcommand
-            if ( pArgs->nParams[ 0 ] == 123 && pArgs->nParams[ 1 ] == 456 ) {
-                if ( _verbosityLevel >= 1 ) {
+        case 'R' : // Reset to 0,0
+            if ( pArgs->nParams[ 0 ] == 9 ) {
+                if ( _messageMask & MM_RESPONSES ) {
                     Serial.println( F( "Position reset to zero" ) );
                 }
+                
+                _currentEncoderPositionLeft = 0;
+                _currentEncoderPositionRight = 0;
             }
             else {
-                Serial.println( F( "Wrong code, position NOT reset" ) );
+                Serial.println( F( "Enter \"PR 9\" to reset" ) );
             }
             break;
     }
@@ -46,23 +49,38 @@ void Position::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
 #define EncoderTicksPerInch 99.44
 #define WheelSpacingInches 10.0
 
-void Position::handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams )
+void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
-    // this is temporary, for testing
-    if ( _verbosityLevel > 1 ) {
-        Serial.println( _pName );
-    }
-
     // first, we compute our current position (x, y, theta)
     _leftInches      = _currentEncoderPositionLeft / EncoderTicksPerInch;
     _rightInches     = _currentEncoderPositionRight / EncoderTicksPerInch;
     _distanceInches  = (_leftInches + _rightInches) / 2.0;
+//    _theta           = fmod( ( (_leftInches - _rightInches) / WheelSpacingInches) + PI, PI ) - PI;
+//    _theta           = atan( tan( (_leftInches - _rightInches) / WheelSpacingInches ) );
     _theta           = (_leftInches - _rightInches) / WheelSpacingInches;
     _xInches         = _distanceInches * sin( _theta );
     _yInches         = _distanceInches * cos( _theta );
     _headingDegrees  = _theta * (180.0 / PI);
 
+    if ( _messageMask & MM_PROGRESS ) {
+        PRINT_VAR( _leftInches     );
+        PRINT_VAR( _rightInches    );
+        PRINT_VAR( _distanceInches );
+        PRINT_VAR( _theta          );
+        PRINT_VAR( _xInches        );
+        PRINT_VAR( _yInches        );
+        PRINT_VAR( _headingDegrees );
+    }
 
+    IF_CSV( MM_CSVBASIC ) {
+        CSV_OUT( _leftInches     );
+        CSV_OUT( _rightInches    );
+        CSV_OUT( _distanceInches );
+        CSV_OUT( _theta          );
+        CSV_OUT( _xInches        );
+        CSV_OUT( _yInches        );
+        CSV_OUT( _headingDegrees );
+    }
 }
 
 
@@ -71,6 +89,7 @@ void Position::PrintHelp( uint8_t eventID )
     // we only handle one event, the "L" command:
     Serial.println( F( "\nPosition Control:" ) );
 //    Actor::PrintHelp( eventID );  // we don't handle any of the common Actor commands (0,1,
-    Serial.println( F( "  PV <level> : Set verbosity level" ) );
-    Serial.println( F( "  PR 123 456 : Reset position to zero" ) );
+    Serial.println( F(  "  PV <level> : Set verbosity level\n" 
+                        "  PR 9 : Reset position to zero" 
+                        ) );
 }

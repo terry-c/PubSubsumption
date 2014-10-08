@@ -60,9 +60,10 @@ public:
 
 //    virtual Subscriber* HandleEvent( EventNotification* pEvent );
     virtual void    handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void    handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams );
+    virtual void    handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
 
     virtual void    PrintHelp( uint8_t eventID );
+    virtual void    PrintSpecificParameterValues();
 
 };

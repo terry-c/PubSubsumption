@@ -28,7 +28,9 @@ LEDDriver::LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin
     SubscribeTo( pCD, 'L' );    // All our commands begin with "L"
 
     _leftRatio = 1.0;
-    _rightRatio = 0.99;   // introduce a differential to simulate extra drag on this side
+    _rightRatio = 1.0;   // introduce a differential to simulate extra drag on this side
+
+    _throttleChangeLimit = 64;  // prevent throttle from changing more than this in each step
 
     pinMode( ledPinLF, OUTPUT );
     pinMode( ledPinRF, OUTPUT );
@@ -49,12 +51,12 @@ void LEDDriver::Update( void ) {
 }
 
 
-void LEDDriver::handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams )
+void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
     if ( _bEnabled ) {
-        MotorParams* pMotorParams = (MotorParams*) pEvent->pData;
-        _throttleLeft = pMotorParams->_throttleLeft;
-        _throttleRight = pMotorParams->_throttleRight;
+        ControlParams* pControlParams = (ControlParams*) pEvent->pData;
+        _throttleLeft = constrain( pControlParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
+        _throttleRight = constrain( pControlParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
 
         analogWrite( ledPinLF, _throttleLeft < 0 ? 0 : constrain( _throttleLeft, 0, 255 ) );
         analogWrite( ledPinRF, _throttleRight < 0 ? 0 : constrain( _throttleRight, 0, 255 ) );
@@ -62,9 +64,9 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, MotorParams* pMot
         analogWrite( ledPinRB, _throttleRight < 0 ? constrain( -_throttleRight, 0, 255 ) : 0 );
 
         // display name of subsuming Actor
-        if ( _verbosityLevel >= 2 && pMotorParams->_pTakenBy ) {
+        if ( _messageMask & MM_INFO && pControlParams->ActorInControl() ) {
             Serial.print( '[' );
-            Serial.print( pMotorParams->_pTakenBy->GetName() );
+            Serial.print( pControlParams->ActorInControl()->GetName() );
             Serial.print( F( "] " ) );
             Serial.print( _throttleLeft );
             Serial.print( '/' );
@@ -75,11 +77,17 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, MotorParams* pMot
         _pPosition->_currentEncoderPositionLeft += _throttleLeft * _leftRatio;
         _pPosition->_currentEncoderPositionRight += _throttleRight * _rightRatio;
 
-        if ( _verbosityLevel >= 2 ) {
+        if ( _messageMask & MM_PROGRESS ) {
             Serial.print( F( "Positions set to: " ) );
             Serial.print( _pPosition->_currentEncoderPositionLeft );
             Serial.print( '/' );
             Serial.println( _pPosition->_currentEncoderPositionRight );
+        }
+
+        IF_CSV( MM_CSVBASIC ) {
+            CSV_OUT( _throttleLeft );
+            CSV_OUT( _throttleRight );
+            CSV_OUT( pControlParams->ActorInControl()->GetName() );
         }
     }
 }
@@ -101,21 +109,24 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
                 analogWrite( ledPinRF, rightSpeed < 0 ? 0 : rightSpeed );
                 analogWrite( ledPinLB, leftSpeed < 0 ? -leftSpeed : 0 );
                 analogWrite( ledPinRB, rightSpeed < 0 ? -rightSpeed : 0 );
-                if ( _verbosityLevel >= 1 ) {
+                if ( _messageMask & MM_RESPONSES ) {
                     Serial.print( F( "LED simulator speeds directly set to: " ) );
                     Serial.print( leftSpeed ); Serial.print( '\t' );
                     Serial.println( rightSpeed );
                 }
             }
             break;
-        case 'R' : // set throttle/speed ratios
+        case 'D' : // set throttle/speed differential
             _leftRatio = pData->fParams[0];
             _rightRatio = pData->fParams[1];
-                if ( _verbosityLevel >= 1 ) {
+                if ( _messageMask & MM_RESPONSES ) {
                     Serial.print( F( "LED simulator throttle/speed ratios set to: " ) );
                     Serial.print( _leftRatio ); Serial.print( '\t' );
                     Serial.println( _rightRatio );
                 }
+            break;
+        case 'L' : // set throttle/speed differential
+            _throttleChangeLimit = pData->nParams[0];\
             break;
     }
 }
@@ -126,6 +137,9 @@ void LEDDriver::PrintHelp( uint8_t eventID )
     // we only handle one event, the "L" command:
     Serial.println( F( "\nLED Emulator Control:" ) );
     Actor::PrintHelp( 'L' );
-    Serial.println( F( "  LS <LeftSpeed> <RightSpeed>: Set 'Motor' speeds" ) );
+    Serial.println( F(  "  LD <LeftRatio> <RightRatio>: Set 'Motor' differential ratios\n"
+                        "  LL <Limit>: Set throttle change limit\n"
+                        "  LS <LeftSpeed> <RightSpeed>: Set 'Motor' speeds"
+                        ) );
 }
 

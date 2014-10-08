@@ -68,12 +68,12 @@ void MotorDriver::Update( void ) {
 }
 
 
-void MotorDriver::handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams )
+void MotorDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
     if ( _bEnabled ) {
-        MotorParams* pMotorParams = (MotorParams*) pEvent->pData;
-        _throttleLeft = pMotorParams->_throttleLeft;
-        _throttleRight = pMotorParams->_throttleRight;
+        ControlParams* pControlParams = (ControlParams*) pEvent->pData;
+        _throttleLeft = pControlParams->GetLeftThrottle();
+        _throttleRight = pControlParams->GetRightThrottle();
 
         bool bReverseLeft = _throttleLeft < 0;
         bool bReverseRight = _throttleRight < 0;
@@ -90,9 +90,9 @@ void MotorDriver::handleControlEvent( EventNotification* pEvent, MotorParams* pM
         digitalWrite( _dirPinRR, bReverseRight ? 1 : 0 );
 
         // display name of subsuming Actor
-        if ( _verbosityLevel >= 2 && pMotorParams->_pTakenBy ) {
+        if ( _messageMask & MM_INFO && pControlParams->ActorInControl() ) {
             Serial.print( '[' );
-            Serial.print( pMotorParams->_pTakenBy->GetName() );
+            Serial.print( pControlParams->ActorInControl()->GetName() );
             Serial.print( F( "] " ) );
             Serial.print( _throttleLeft );
             Serial.print( '/' );
@@ -103,7 +103,7 @@ void MotorDriver::handleControlEvent( EventNotification* pEvent, MotorParams* pM
         _pPosition->_currentEncoderPositionLeft += _throttleLeft;
         _pPosition->_currentEncoderPositionRight += _throttleRight;
 
-        if ( _verbosityLevel >= 2 ) {
+        if ( _messageMask & MM_INFO ) {
             Serial.print( F( "Positions set to: " ) );
             Serial.print( _pPosition->_currentEncoderPositionLeft );
             Serial.print( '/' );
@@ -134,7 +134,7 @@ void MotorDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pA
                 analogWrite( _pwmPinLR, leftSpeed < 0 ? -leftSpeed : 0 );
                 analogWrite( _pwmPinRR, rightSpeed < 0 ? -rightSpeed : 0 );
 
-                if ( _verbosityLevel >= 1 ) {
+                if ( _messageMask & MM_RESPONSES ) {
                     Serial.print( F( "Motor speeds directly set to: " ) );
                     Serial.print( leftSpeed ); Serial.print( '\t' );
                     Serial.println( rightSpeed );

@@ -38,9 +38,9 @@ CollisionRecovery::CollisionRecovery( CommandDispatcher* pCD, uint8_t leftPin, u
 }
 
 
-void CollisionRecovery::handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams )
+void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
-    if ( NULL == pMotorParams->_pTakenBy ) {
+    if ( ! pControlParams->ActorInControl() ) {
         bool bInControl = true;
         int leftMotorSpeed = 0;
         int rightMotorSpeed = 0;
@@ -56,7 +56,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, MotorPara
                     rightMotorSpeed = 0;
                     _eState = eStopped;
                     _nStateTimer = _StateTimes[ _eState ] - 1;
-                    if ( _verbosityLevel >= 2 ) {
+                    if ( _messageMask & MM_PROGRESS ) {
                         Serial.println( F( "Stopped" ) );
                     }
                 }
@@ -70,7 +70,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, MotorPara
                 if ( --_nStateTimer == 0 ) {
                     _eState = eReversing;
                     _nStateTimer = _StateTimes[ _eState ];
-                    if ( _verbosityLevel >= 2 ) {
+                    if ( _messageMask & MM_PROGRESS ) {
                         Serial.println( F( "Reverse" ) );
                     }
                 }
@@ -80,7 +80,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, MotorPara
                 if ( --_nStateTimer == 0 ) {
                     _eState = eTurning;
                     _nStateTimer = _StateTimes[ _eState ];
-                    if ( _verbosityLevel >= 2 ) {
+                    if ( _messageMask & MM_PROGRESS ) {
                         Serial.println( F( "Turning" ) );
                     }
                 }
@@ -96,7 +96,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, MotorPara
                 if ( --_nStateTimer == 0 ) {
                     _eState = eForward;
                     _nStateTimer = _StateTimes[ _eState ];
-                    if ( _verbosityLevel >= 2 ) {
+                    if ( _messageMask & MM_PROGRESS ) {
                         Serial.println( F( "Forward" ) );
                     }
                 }
@@ -107,7 +107,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, MotorPara
                     _eState = eNormal;
                     _bSimBumpLeft = false;
                     _bSimBumpRight = false;
-                    if ( _verbosityLevel >= 2 ) {
+                    if ( _messageMask & MM_PROGRESS ) {
                         Serial.println( F( "Done" ) );
                     }
                 }
@@ -115,10 +115,8 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, MotorPara
 
         }
         if ( bInControl ) {
-            pMotorParams->_pTakenBy = this;
-            pMotorParams->_throttleLeft = leftMotorSpeed;
-            pMotorParams->_throttleRight = rightMotorSpeed;
-
+            pControlParams->ControlledBy( this );
+            pControlParams->SetThrottles( leftMotorSpeed, rightMotorSpeed );
         }
     }
 }
@@ -132,14 +130,14 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
             break;
         
         case 'L' : // Simulated Bump left
-            if ( _verbosityLevel >= 1 ) {
+            if ( _messageMask & MM_PROGRESS ) {
                 Serial.println("Bump Left!");
             }
             _bSimBumpLeft = true;
             break;
         
         case 'R' : // Simulated Bump right
-            if ( _verbosityLevel >= 1 ) {
+            if ( _messageMask & MM_PROGRESS ) {
                 Serial.println("Bump Right!");
             }
             _bSimBumpRight = true;
@@ -149,7 +147,7 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
             _StateSpeeds[0] = 0;
             for ( int ixArg = 0; ixArg <= 3; ixArg++ ) {
                 _StateSpeeds[ixArg + 1] = pArgs->nParams[ixArg];
-                if ( _verbosityLevel >= 1 ) {
+                if ( _messageMask & MM_PROGRESS ) {
                     Serial.print( "Bump speed " );
                     Serial.print( ixArg + 1 );
                     Serial.print( " set to " );
@@ -162,7 +160,7 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
             _StateTimes[0] = 0;
             for ( int ixArg = 0; ixArg <= 3; ixArg++ ) {
                 _StateTimes[ixArg + 1] = pArgs->nParams[ixArg];
-                if ( _verbosityLevel >= 1 ) {
+                if ( _messageMask & MM_PROGRESS ) {
                     Serial.print( "Bump time " );
                     Serial.print( ixArg + 1 );
                     Serial.print( " set to " );
@@ -180,5 +178,25 @@ void CollisionRecovery::PrintHelp( uint8_t eventID )
     Serial.println( F(  "  BL: Simulate bump left\n"
                         "  BR: Simulate bump right\n"
                         "  BS: <s1> <s2> <s3> <s4> Speeds (throttle) \n"
-                        "  BT: <t1> <t2> <t3> <t4> Times (ticks)" ) ); 
+                        "  BT: <t1> <t2> <t3> <t4> Times (ticks)" 
+                        ) ); 
+}
+
+
+void CollisionRecovery::PrintSpecificParameterValues()
+{
+    Serial.println( F( "Collision Recovery" ) );
+    Serial.print( F( " Speeds:" ) );
+    for ( int ix = 0; ix < 4; ix++ ) {
+        Serial.print( '\t' );
+        Serial.print( _StateSpeeds[ ix ] );
+    }
+    Serial.println();
+
+    Serial.print( F( " Times:" ) );
+    for ( int ix = 0; ix < 4; ix++ ) {
+        Serial.print( '\t' );
+        Serial.print( _StateSpeeds[ ix ] );
+    }
+    Serial.println();
 }
