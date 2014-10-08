@@ -1,0 +1,8 @@
+*.xml
+*.vcxproj
+*.sln
+*.suo
+*.sdf
+*.filters
+*.vsarduino.h
+*.opensdf

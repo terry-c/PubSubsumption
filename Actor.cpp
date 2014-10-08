@@ -10,7 +10,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include "Actor.h"
 
-Actor::Actor( CommandDispatcher* pCD ) : CommandSubscriber( pCD ), _bEnabled( true ), _verbosityLevel( 1 )
+Actor::Actor( CommandDispatcher* pCD ) : CommandSubscriber( pCD ), _bEnabled( true ), _messageMask( 1 )
 {
 
 }
@@ -38,7 +38,11 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
     Subscriber* pReturnSub = NULL;
 
     if ( pEvent->eventID == 0 ) {   // Director event
-        handleControlEvent( pEvent, (MotorParams*) pEvent->pData );
+        if ( _messageMask & MM_ID ) {
+            Serial.print( _bEnabled ? '+' : '-' ); Serial.println( _pName );
+        }
+
+        handleControlEvent( pEvent, (ControlParams*) pEvent->pData );
         pReturnSub = _pNextActor;
     }
     else {  // CommandDispatcher event
@@ -56,11 +60,24 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
             case '1' : 
                 _bEnabled = true; 
                 break;
+            case 'Q' :
+                PrintParameterValues();
+                break;
             case 'V' :
-                _verbosityLevel = pArgs->nParams[ 0 ];
+                switch ( pArgs->inputBuffer[2] ) {
+                    case 0 : // no command modifier, just set the value
+                        _messageMask = pArgs->nParams[ 0 ]; 
+                        break;
+                    case '+' : // add these bits
+                        _messageMask |= pArgs->nParams[ 0 ];
+                        break;
+                    case '-' : // remove these bits
+                        _messageMask &= ~pArgs->nParams[ 0 ];
+                        break;
+                }
                 Serial.print( _pName );
-                Serial.print( F( " verbosity level = " ) ) ;
-                Serial.println( _verbosityLevel );
+                Serial.print( F( " message mask:\t0x" ) ) ;
+                Serial.println( _messageMask, HEX );
                 break;
             default: 
                 handleCommandEvent( pEvent, pArgs ); 
@@ -72,12 +89,31 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
 
 void Actor::PrintHelp( uint8_t eventID )
 {
+    PrintParameterValues();
+
     Serial.print( "  " ); Serial.print( (char) eventID );
     Serial.println( F( "0: Disable" ) );
     Serial.print( "  " ); Serial.print( (char) eventID );
     Serial.println( F( "1: Enable" ) );
     Serial.print( "  " ); Serial.print( (char) eventID );
-    Serial.println( F( "V <level> : Set verbosity level" ) );
+    Serial.println( F( "Q: Query Parameter Values" ) );
+    Serial.print( "  " ); Serial.print( (char) eventID );
+    Serial.println( F( "V[+|-] <mask> : Set verbosity mask, or add/remove bits" ) );
 }
 
+void Actor::PrintParameterValues()
+{
+    Serial.print( '\n' );
+    Serial.print( _pName );
+    Serial.print( ": " );
+    Serial.print( _bEnabled ? F( "Enabled" ) : F( "Disabled" ) );
+    Serial.print( F( ", verbosity = " ) );
+    Serial.println( _messageMask, HEX );
+    PrintSpecificParameterValues();
+}
 
+void Actor::PrintSpecificParameterValues()
+{
+    Serial.print( F( " No parameter query defined for " ) );
+    Serial.println( _pName );
+}
