@@ -22,18 +22,23 @@ class Waypoint
 {
 public:
 
-    Waypoint( int x, int y, int h ) : _x(x), _y(y), _heading(h) {}
+    Waypoint( int x = 0, int y = 0, int radius = 0 ) : _x(x), _y(y), _radius(radius) {}
 
-    int _x;
-    int _y;
-    int _heading;
+    void Set( int x, int y, int radius ) { _x = x; _y = y; _radius = radius; }
 
-    Waypoint* _pNextWaypoint;
+    int         _x;
+    int         _y;
+    uint8_t     _radius;
+
+//    Waypoint*   _pNextWaypoint;
 };
 
 class WaypointManager : public CommandSubscriber
 {
-    Waypoint* _pFirstWaypoint;
+//    Waypoint*   _pFirstWaypoint;
+    uint16_t    _nextWaypoint;
+
+    Waypoint    _waypoints[10];
 /*
     void    Append( Waypoint* pWaypoint );
     void    Insert( Waypoint* pWaypoint, uint16_t index );
@@ -51,10 +56,9 @@ public:
     WaypointManager( CommandDispatcher* pCD );
     ~WaypointManager();
 
-    Waypoint*               FirstWaypoint()   { return _pFirstWaypoint; }
+    Waypoint*               GetWaypoint( uint16_t ixWaypoint )   { return ixWaypoint < _nextWaypoint ? &_waypoints[ ixWaypoint ] : NULL; }
 
     virtual Subscriber*     HandleEvent( EventNotification* pEvent );
 
     virtual void            PrintHelp( uint8_t eventID );
-
 };
