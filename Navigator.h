@@ -13,6 +13,7 @@ Subsumption Architecture as described by David P. Anderson.
 #include <CommandDispatcher.h>
 #include <Director.h>
 #include <Position.h>
+#include <WaypointManager.h>
 
 // Navigator class
 //
@@ -39,24 +40,36 @@ class Navigator : public Actor
     // pointer to hold the Director chain.
 //    Subscriber* _pNextActor;
 
-    Position* _pPosition;
+    Position*           _pPosition;
+    WaypointManager*    _pWaypointManager;
 
-    int _leftMotorSpeed;
-    int _rightMotorSpeed;
-    eNavigatorState _eState;
+    Waypoint*           _pCurrentWaypoint;
+    int                 _waypointNumber;
 
-    int _targetHeading;
-    int _turnRadius;
+    int                 _leftMotorSpeed;
+    int                 _rightMotorSpeed;
+    eNavigatorState     _eState;
 
+    int                 _leftThrottleSnapshot;
+    int                 _rightThrottleSnapshot;
 
+    int                 _turnRadius;
+
+    float               _headingTolerance;
+    float               _brakingFactor;
+
+    bool                _bCorrecting;
+//    bool                _bAtDestination;
+
+    float fmap (float value, float fromMin, float fromMax, float toMin, float toMax) { return ( value - fromMin ) * ( toMax - toMin ) / ( fromMax - fromMin ) + toMin; }
 
 public:
 
-    Navigator( CommandDispatcher* pCD, Position* pOd );
+    Navigator( CommandDispatcher* pCD, Position* pOd, WaypointManager* pWM );
 
 //    virtual Subscriber* HandleEvent( EventNotification* pEvent );
     virtual void    handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void    handleControlEvent( EventNotification* pEvent, MotorParams* pMotorParams );
+    virtual void    handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
     virtual void    PrintHelp( uint8_t eventID );
 };
