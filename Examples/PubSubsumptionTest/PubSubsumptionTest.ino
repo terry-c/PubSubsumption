@@ -46,7 +46,7 @@ LEDDriver          led( 9, 6, 5, 3, &dispatcher, &position );
 //MotorDriver          motor( 2, 3, 4, 5, 8, 9, 10, 11, &dispatcher, &Position );
 
 // Navigator keeps us on course toward the next waypoint
-Navigator           navigator(&dispatcher, &position);
+Navigator           navigator(&dispatcher, &position, &waypointManager);
 
 // CollisionRecovery responds to bumping into things.
 CollisionRecovery   bumper( &dispatcher, 0, 0 );

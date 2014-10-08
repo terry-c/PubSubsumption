@@ -11,21 +11,19 @@ Subsumption Architecture as described by David P. Anderson.
 //#include <Arduino.h>
 #include "CommandDispatcher.h"
 
+CommandDispatcher::CommandDispatcher() 
+{
+    notification.pPublisher = this;
+    notification.pData = &args;
 
+    memset(args.nParams, 0, sizeof(args.nParams) );
+    memset(args.fParams, 0, sizeof(args.fParams) );
+    memset(subscribers, 0, sizeof(subscribers) );
+    memset( args.inputBuffer, 0, sizeof( args.inputBuffer ) );
+    bufIx = 0;
+}
 
-    CommandDispatcher::CommandDispatcher() {
-        notification.pPublisher = this;
-        notification.pData = &args;
-
-        // need to check syntax of memset():
-        memset(args.nParams, 0, sizeof(args.nParams) );
-        memset(args.fParams, 0, sizeof(args.fParams) );
-        memset(subscribers, 0, sizeof(subscribers) );
-        memset( args.inputBuffer, 0, sizeof( args.inputBuffer ) );
-        bufIx = 0;
-    }
-
-    CommandDispatcher::~CommandDispatcher() {}
+CommandDispatcher::~CommandDispatcher() {}
 
 #define TokenDelimiters " ,\t"
 
@@ -47,11 +45,9 @@ void CommandDispatcher::Update()
         if ( '\r' == ch ) {
             // process command completion
             
-
             // parse out the command character
             char* pCh = strtok( args.inputBuffer, TokenDelimiters );
             char cmdChar = pCh[0];  // command is the first character of the first token
-
 
             // parse out the remaining arguments
             int argIx = 0;
@@ -73,6 +69,8 @@ void CommandDispatcher::Update()
                     }
                     break;
                 case '*' : // broadcast
+                    Serial.print( F( "\nBroadcasting command: " ) );
+                    Serial.println( args.inputBuffer + 1 );
                     for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
                         dispatchCommand( cmd, eNotify );
                     }
