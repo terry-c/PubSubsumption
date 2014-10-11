@@ -33,7 +33,7 @@ public:
 
     ControlParams() : _throttleLeft( 0 ), _throttleRight( 0 ), _csvState( eCsvIdle ), _csvDelimiter( '\t' )                         {};
 
-    void        ControlledBy( Actor* pActor )            { _pTakenBy = pActor; }
+    void        ControlledBy( Actor* pActor )           { _pTakenBy = pActor; }
     Actor*      ActorInControl()                        { return _pTakenBy; }
 
     void        SetThrottles( int left, int right )     { _throttleLeft = left; _throttleRight = right; }

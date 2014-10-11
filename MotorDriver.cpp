@@ -99,15 +99,11 @@ void MotorDriver::handleControlEvent( EventNotification* pEvent, ControlParams* 
             Serial.println( _throttleRight );
         }
 
-        // simulate Position update
-        _pPosition->_currentEncoderPositionLeft += _throttleLeft;
-        _pPosition->_currentEncoderPositionRight += _throttleRight;
-
         if ( _messageMask & MM_INFO ) {
-            Serial.print( F( "Positions set to: " ) );
-            Serial.print( _pPosition->_currentEncoderPositionLeft );
-            Serial.print( '/' );
-            Serial.println( _pPosition->_currentEncoderPositionRight );
+            //Serial.print( F( "Positions set to: " ) );
+            //Serial.print( _pPosition->_currentEncoderPositionLeft );
+            //Serial.print( '/' );
+            //Serial.println( _pPosition->_currentEncoderPositionRight );
 
             PRINT_VAR( bReverseLeft );
             PRINT_VAR( bReverseRight );

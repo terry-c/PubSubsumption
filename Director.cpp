@@ -50,6 +50,9 @@ void Director::Update()
             // reset the flag and send it down the line
             _controlParams.ControlledBy( NULL );
         }
+        IF_MSG( MM_PROGRESS ) {
+            Serial.println( F( "\n----" ) );
+        }
         publish( _pFirstSubscriber, &notification );
 
         // CSV state change.  If we've done headings, move on to data.
@@ -100,7 +103,7 @@ void Director::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
         case 'G' :  // Go -- allow Actors to act
             _bInhibit = false;
             if ( _messageMask & MM_RESPONSES ) {
-                Serial.println( F( "Director Started" ) );
+                Serial.println( F( "\n==========================\nDirector Started" ) );
             }
             break;
         case 'L' : // begin CSV logging

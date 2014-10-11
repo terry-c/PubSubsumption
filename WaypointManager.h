@@ -61,4 +61,8 @@ public:
     virtual Subscriber*     HandleEvent( EventNotification* pEvent );
 
     virtual void            PrintHelp( uint8_t eventID );
+
+    // Since WaypointManager is not an Actor, we have to handle this ourselves.
+    void                    PrintParameterValues();
+
 };

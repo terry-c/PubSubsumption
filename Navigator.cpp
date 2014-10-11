@@ -63,6 +63,19 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                     IF_MSG( MM_PROGRESS ) {
                         Serial.println( F( "\nNext Waypoint\n" ) );
                     }
+                    
+                    if ( !_pCurrentWaypoint ) {
+
+                        // no further waypoints, so shut down and take control
+                        IF_MSG( MM_PROGRESS ) {
+                            Serial.println( F( "\nWe have arrived!\n" ) );
+                        }
+
+                        pControlParams->SetThrottles( 0, 0 );
+                        pControlParams->ControlledBy( this );
+                        _waypointNumber = 0;
+                    }
+
                 }
                 else {
 
@@ -130,7 +143,11 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                 }
             }
             else {
-                // no further waypoints, so shut down and take control
+                // no waypoints, so shut down and take control
+
+                IF_MSG( MM_PROGRESS ) {
+                    Serial.println( F( "Destination reached." ) );
+                }
                 pControlParams->SetThrottles( 0, 0 );
                 pControlParams->ControlledBy( this );
                 _waypointNumber = 0;

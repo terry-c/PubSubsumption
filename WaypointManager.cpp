@@ -49,19 +49,7 @@ Subscriber* WaypointManager::HandleEvent( EventNotification* pEvent )
             case 'M' : // modify a waypoint
                 break;
             case 'Q' : // query (list waypoints).  Since WaypointManager is not an actor, we have to do this ourselves.
-                if ( _nextWaypoint ) {
-                    Serial.println( F( "\nDefined waypoints:" ) );
-                    Serial.println( F( "x\ty\tradius" ) );
-                }
-                else {
-                    Serial.println( F( "\nNo waypoints defined." ) ) ;
-                }
-
-                for ( int ix = 0; ix < _nextWaypoint; ix++ ) {
-                    Serial.print( _waypoints[ ix ]._x ); Serial.print( '\t' );
-                    Serial.print( _waypoints[ ix ]._y ); Serial.print( '\t' );
-                    Serial.println( _waypoints[ ix ]._radius );
-                }
+                PrintParameterValues();
                 break;
             case 'X' : // clear waypoint list
                 _nextWaypoint = 0;
@@ -75,6 +63,20 @@ Subscriber* WaypointManager::HandleEvent( EventNotification* pEvent )
 
 void WaypointManager::PrintHelp( uint8_t eventID ) 
 {
+    if ( _nextWaypoint ) {
+        Serial.println( F( "\nDefined waypoints:" ) );
+        Serial.println( F( "x\ty\tradius" ) );
+    }
+    else {
+        Serial.println( F( "\nNo waypoints defined." ) ) ;
+    }
+
+    for ( int ix = 0; ix < _nextWaypoint; ix++ ) {
+        Serial.print( _waypoints[ ix ]._x ); Serial.print( '\t' );
+        Serial.print( _waypoints[ ix ]._y ); Serial.print( '\t' );
+        Serial.println( _waypoints[ ix ]._radius );
+    }
+
    // we only handle one event, the "W" command:
     Serial.println( F(  "\nWaypoint Manager Control:\n"
                         "  W0: Disable\n"
@@ -87,4 +89,8 @@ void WaypointManager::PrintHelp( uint8_t eventID )
                         "  WQ: Query\n"
                         "  WX: Clear" 
                         ) );
+}
+
+void WaypointManager::PrintParameterValues()
+{
 }

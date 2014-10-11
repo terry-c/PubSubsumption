@@ -62,7 +62,9 @@ void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pCo
     _yInches         = _distanceInches * cos( _theta );
     _headingDegrees  = _theta * (180.0 / PI);
 
-    if ( _messageMask & MM_PROGRESS ) {
+    IF_MSG( MM_PROGRESS ) {
+        PRINT_VAR( _currentEncoderPositionLeft );
+        PRINT_VAR( _currentEncoderPositionRight );
         PRINT_VAR( _leftInches     );
         PRINT_VAR( _rightInches    );
         PRINT_VAR( _distanceInches );
