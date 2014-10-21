@@ -21,7 +21,7 @@ console commands and dispatches them to the appropriate Subscriber.  A simple co
 delimited by spaces or commas.  The initial letter can be seen as a noun, corresponding to a specific Subscriber.  The second character is typically a verb, or subcommand.  Other characters may be used as command modifiers.
 The CommandDispatcher has no "knowledge" of the commands beyond the basic structure.  All interpretation is up to the Subscribers.
 
-Another possible Publisher might be a menuing system, though there has been no development in this direction.
+The CommandDispatcher also has a "menu mode".  Entering just the first command letter with no subcommands or arguments puts it into this mode and presents a submenu for that command.  The current implementation smells a bit hacky, but works well enough to evaluate this feature.  The command mode still works as before, with the exception that you have to be sure to be at the top level to enter a command.
 
 ## Status
 
