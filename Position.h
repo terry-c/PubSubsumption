@@ -39,7 +39,7 @@ public:
         uint32_t*& leftPosition, uint32_t*& rightPosition,  // pointers to _currentEncoderPositionLeft and _currentEncoderPositionRight
         float ticksPerRev, float wheelDiameter, float wheelSpacing );
 
-    void PrintHelp( uint8_t eventID );
+    void PrintHelp();
 
     /// these are the raw encoder positions, updated directly by the encoder interrupt handlers
     uint32_t    _currentEncoderPositionLeft;

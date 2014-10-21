@@ -142,11 +142,9 @@ void MotorDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pA
 }
 
 
-void MotorDriver::PrintHelp( uint8_t eventID ) 
+void MotorDriver::PrintHelp() 
 {
-    // we only handle one event, the "L" command:
-    Serial.println( F( "\nMotor Driver Control:" ) );
-    Actor::PrintHelp( 'M' );
+    Actor::PrintHelp();
     Serial.println( F( "  MS <LeftSpeed> <RightSpeed>: Set 'Motor' speeds" ) );
 }
 

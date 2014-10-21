@@ -27,7 +27,13 @@ public:
     float   fParams[MaxArgs];
 };
 
-
+// here's a new thought:  Add a menu mode to the CommandDispatcher.  Here's how it might work (just thinking this through):
+// entering just an actor command character (e.g., 'N' for Navigator) with no subcommands or arguments puts the CommandDispatcher
+// into a mode for that actor.  The Actor's "menu" (list of commands) will be displayed and subsequent commands will be subcommands 
+// for that Actor.  These subcommands can include modifiers and arguments.  A special character (maybe ESC?) will "return" to the
+// "main menu" mode.
+// This might be as simple as prepending the command character when in this mode, then dispatching it as usual.  In this mode, after
+// each command, the menu can be redisplayed, maybe controlled by a verbosity bit.
 class CommandDispatcher : public Publisher
 {
 
@@ -44,11 +50,15 @@ class CommandDispatcher : public Publisher
     Subscriber* subscribers[26];
 
     // this is the event notification object which is passed to Subscribers
-    CommandArgs args;
+    CommandArgs _args;
 
     enum eDispatchAction { eNotify, eHelpSummary, eHelpDetail };
 
     Subscriber* dispatchCommand( char cmdChar, eDispatchAction eAction );
+    void        processCommandLine( void );
+
+    bool        _bMenuMode;
+    char        _menuModeCmdChar;
 
 public:
 

@@ -53,7 +53,7 @@ public:
 
     // derived Actors should override PrintHelp() to provide specific help.
     // they can call Actor::PrintHelp() to display the common commands (Help, Enable, Disable)
-    virtual void        PrintHelp( uint8_t eventID );
+    virtual void        PrintHelp();
 
     // derived Actors should override PrintSpecificParameterValues() to list their respective parameters
     virtual void        PrintSpecificParameterValues();

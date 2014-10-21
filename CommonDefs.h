@@ -13,17 +13,17 @@ Subsumption Architecture as described by David P. Anderson.
 #include "Arduino.h"
 //#include <EEPROM.h>
 
-/// Print the value of the given variable, using the variable name as a label.
+/// Print the value of the given expression, using the expression text as a label.
 /// Uses the F() macro to print strings directly from Program Memory without using RAM
 #define PRINT_VAR( x ) Serial.print( F( #x " = " ) ); Serial.println( x );
 
-#define USE_CSV
+#define IF_MSG( MASK ) if ( _messageMask & MASK )
+
+//#define USE_CSV
 #ifdef USE_CSV
 
 /// Determine whether to output CSV headings or data
 #define IF_CSV( MASK ) if ( _messageMask & MASK && pControlParams->PrintingCsv() )
-
-#define IF_MSG( MASK ) if ( _messageMask & MASK )
 
 /// Output either heading or data, separated by commas (or other delimiter)
 #define CSV_OUT( VAR ) \
@@ -36,9 +36,8 @@ Subsumption Architecture as described by David P. Anderson.
         Serial.print( VAR ); \
     Serial.print( pControlParams->GetCsvDelimiter() );
 #else
-#define IF_CSV
-#define IF_MSG
-#define CSV_OUT
+#define IF_CSV( X )
+#define CSV_OUT( X )
 #endif
 
 /// Message Mask bits

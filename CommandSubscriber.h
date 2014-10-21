@@ -25,5 +25,5 @@ public:
     CommandSubscriber( CommandDispatcher* pCD );
 
     /// Display usage notes for subcommands.
-    virtual void        PrintHelp( uint8_t eventID ) = 0;
+    virtual void        PrintHelp() = 0;
 };

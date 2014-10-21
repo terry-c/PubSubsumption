@@ -13,13 +13,15 @@ Subsumption Architecture as described by David P. Anderson.
 
 CommandDispatcher::CommandDispatcher() 
 {
-    notification.pPublisher = this;
-    notification.pData = &args;
+    _menuModeCmdChar = 0;
 
-    memset(args.nParams, 0, sizeof(args.nParams) );
-    memset(args.fParams, 0, sizeof(args.fParams) );
+    notification.pPublisher = this;
+    notification.pData = &_args;
+
+    memset(_args.nParams, 0, sizeof(_args.nParams) );
+    memset(_args.fParams, 0, sizeof(_args.fParams) );
     memset(subscribers, 0, sizeof(subscribers) );
-    memset( args.inputBuffer, 0, sizeof( args.inputBuffer ) );
+    memset( _args.inputBuffer, 0, sizeof( _args.inputBuffer ) );
     bufIx = 0;
 }
 
@@ -43,57 +45,91 @@ void CommandDispatcher::Update()
     if ( Serial.available() > 0 ) {
         char ch = toUpperCase( Serial.read() );
         if ( '\r' == ch ) {
-            // process command completion
-            
-            // parse out the command character
-            char* pCh = strtok( args.inputBuffer, TokenDelimiters );
-            char cmdChar = pCh[0];  // command is the first character of the first token
 
-            // parse out the remaining arguments
-            int argIx = 0;
-            while ( pCh && argIx < MaxArgs ) {
-                pCh = strtok( NULL, TokenDelimiters );
-                args.fParams[ argIx ] = atof( pCh );
-                args.nParams[ argIx ] = atoi( pCh );
-                argIx++;
-            }
-
-            switch ( cmdChar ) {
-                case '?' :
-                    // if just a ?, or invalid command, list commands
-                    if ( ( strlen( args.inputBuffer ) == 1 ) || dispatchCommand( args.inputBuffer[1], eHelpDetail ) == NULL ) {
-                        Serial.println(F("\nAvailable Objects:"));
-                        for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
-                            dispatchCommand( cmd, eHelpSummary );
-                        }
-                    }
-                    break;
-                case '*' : // broadcast
-                    Serial.print( F( "\nBroadcasting command: " ) );
-                    Serial.println( args.inputBuffer + 1 );
-                    for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
-                        dispatchCommand( cmd, eNotify );
-                    }
-                    break;
-                default:
-                    dispatchCommand( cmdChar, eNotify );
-                    break;
-            }
+            processCommandLine();
 
             // reset the buffer
-            memset( args.inputBuffer, 0, sizeof( args.inputBuffer ) );
-            bufIx = 0;
+            memset( _args.inputBuffer, 0, sizeof( _args.inputBuffer ) );
+
+            // if we're in "menu mode", prepend the menu command character
+            if ( _menuModeCmdChar != 0 ) {
+                _args.inputBuffer[0] = _menuModeCmdChar;
+                bufIx = 1;
+            }
+            else {
+                bufIx = 0;
+            }
         }
         else {
             if ( bufIx >= 32 ) {
                 // buffer overflow
             }
             else {
-                args.inputBuffer[ bufIx++ ] = ch;
+                _args.inputBuffer[ bufIx++ ] = ch;
             }
         }
     }
 }
+
+void CommandDispatcher::processCommandLine( void )
+{
+    int cmdLen = strlen( _args.inputBuffer );
+    if ( cmdLen == 0 || (_menuModeCmdChar > 0 && cmdLen == 1) ) {
+        _menuModeCmdChar = 0;
+        // display top-level menu
+        Serial.println(F("\n=================="
+                         "\nAvailable Objects:\n"));
+        for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
+            dispatchCommand( cmd, eHelpSummary );
+        }
+    }
+    else {
+        // process command completion
+
+        // parse out the command character
+        char* pCh = strtok( _args.inputBuffer, TokenDelimiters );
+        char cmdChar = pCh[0];  // command is the first character of the first token
+
+        if ( strlen( pCh ) > 1 ) {
+            // parse out the remaining arguments
+            int argIx = 0;
+            while ( pCh && argIx < MaxArgs ) {
+                pCh = strtok( NULL, TokenDelimiters );
+                _args.fParams[ argIx ] = atof( pCh );
+                _args.nParams[ argIx ] = atoi( pCh );
+                argIx++;
+            }
+        }
+        else {   // single character switches to menu mode
+            pCh[1] = '?';   // set up for Actor's menu display
+            _bMenuMode = true;
+            _menuModeCmdChar = cmdChar;
+        }
+
+        switch ( cmdChar ) {
+        case '?' :
+            // if just a ?, or invalid command, list commands
+            if ( ( strlen( _args.inputBuffer ) == 1 ) || dispatchCommand( _args.inputBuffer[1], eHelpDetail ) == NULL ) {
+                Serial.println(F("\nAvailable Objects:"));
+                for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
+                    dispatchCommand( cmd, eHelpSummary );
+                }
+            }
+            break;
+        case '*' : // broadcast
+            Serial.print( F( "\nBroadcasting command: " ) );
+            Serial.println( _args.inputBuffer + 1 );
+            for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
+                dispatchCommand( cmd, eNotify );
+            }
+            break;
+        default:
+            dispatchCommand( cmdChar, eNotify );
+            break;
+        }
+    }
+}
+
 
 /// Subscribe is inherited from the Publisher base class.  This associates a Subscriber with a specified
 /// command letter.  The return value is a pointer to the current Subscriber (if any) for that event.  The

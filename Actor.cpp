@@ -10,10 +10,12 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include "Actor.h"
 
+
 Actor::Actor( CommandDispatcher* pCD ) : CommandSubscriber( pCD ), _bEnabled( true ), _messageMask( 1 )
 {
 
 }
+
 
 void Actor::SubscribeTo( Publisher* pPub, uint8_t eventID /* = 0 */ )
 {
@@ -29,6 +31,7 @@ void Actor::SubscribeTo( Publisher* pPub, uint8_t eventID /* = 0 */ )
         }
     }
 }
+
 
 // For an Actor, there are two kinds of events:  Control events from the Director, or
 // Command events from the Dispatcher.  Here, we distinguish between the two and
@@ -52,13 +55,21 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
         CommandArgs* pArgs = (CommandArgs*) pEvent->pData;
         switch ( pArgs->inputBuffer[1] ) {
             case '?' :
-                PrintHelp( pEvent->eventID );
+                PrintHelp();
                 break;
             case '0' : 
                 _bEnabled = false; 
+                IF_MSG( MM_RESPONSES ) {
+                    Serial.print( _pName );
+                    Serial.println( F( " disabled." ) );
+                }
                 break;
             case '1' : 
                 _bEnabled = true; 
+                IF_MSG( MM_RESPONSES ) {
+                    Serial.print( _pName );
+                    Serial.println( F( " enabled." ) );
+                }
                 break;
             case 'Q' :
                 PrintParameterValues();
@@ -87,30 +98,30 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
     return pReturnSub;
 }
 
-void Actor::PrintHelp( uint8_t eventID )
+void Actor::PrintHelp()
 {
+    Serial.print( "\n========\n" );
     PrintParameterValues();
-
-    Serial.print( "  " ); Serial.print( (char) eventID );
-    Serial.println( F( "0: Disable" ) );
-    Serial.print( "  " ); Serial.print( (char) eventID );
-    Serial.println( F( "1: Enable" ) );
-    Serial.print( "  " ); Serial.print( (char) eventID );
-    Serial.println( F( "Q: Query Parameter Values" ) );
-    Serial.print( "  " ); Serial.print( (char) eventID );
-    Serial.println( F( "V[+|-] <mask> : Set verbosity mask, or add/remove bits" ) );
+    Serial.println("\n- - -\n");
+    Serial.print( _pName );
+    Serial.println( " options:\n" );
+    Serial.println( F( "  0: Disable" ) );
+    Serial.println( F( "  1: Enable" ) );
+    Serial.println( F( "  Q: Query Parameter Values" ) );
+    Serial.println( F( "  V[+|-] <mask> : Set verbosity mask, or add/remove bits" ) );
 }
+
 
 void Actor::PrintParameterValues()
 {
-    Serial.print( '\n' );
     Serial.print( _pName );
     Serial.print( ": " );
     Serial.print( _bEnabled ? F( "Enabled" ) : F( "Disabled" ) );
-    Serial.print( F( ", verbosity = " ) );
+    Serial.print( F( ", verbosity = 0x" ) );
     Serial.println( _messageMask, HEX );
     PrintSpecificParameterValues();
 }
+
 
 void Actor::PrintSpecificParameterValues()
 {

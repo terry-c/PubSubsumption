@@ -33,7 +33,7 @@ Subscriber* WaypointManager::HandleEvent( EventNotification* pEvent )
             case 0 : // no subcommand
                 break;
             case '?' : 
-                PrintHelp( pEvent->eventID );
+                PrintHelp();
                 break;
             case 'A' : {// append a waypoint 
                 _waypoints[ _nextWaypoint++ ].Set( pArgs->nParams[ 0 ], pArgs->nParams[ 1 ], pArgs->nParams[ 2 ] );
@@ -61,7 +61,7 @@ Subscriber* WaypointManager::HandleEvent( EventNotification* pEvent )
     return _pNextSub;
 }
 
-void WaypointManager::PrintHelp( uint8_t eventID ) 
+void WaypointManager::PrintHelp() 
 {
     if ( _nextWaypoint ) {
         Serial.println( F( "\nDefined waypoints:" ) );
@@ -78,16 +78,16 @@ void WaypointManager::PrintHelp( uint8_t eventID )
     }
 
    // we only handle one event, the "W" command:
-    Serial.println( F(  "\nWaypoint Manager Control:\n"
-                        "  W0: Disable\n"
-                        "  W1: Enable\n"
-                        "  WA <x> <y> <radius> : Add waypoint\n"
-                        "  WI: Insert\n"
-                        "  WD: Delete\n"
-                        "  WM: Modify\n"
-                        "  WL: Load\n"
-                        "  WQ: Query\n"
-                        "  WX: Clear" 
+    Serial.println( F(  "\nWaypoint Manager Options:\n"
+                        "  0: Disable\n"
+                        "  1: Enable\n"
+                        "  A <x> <y> <radius> : Add waypoint\n"
+                        "  I: Insert\n"
+                        "  D: Delete\n"
+                        "  M: Modify\n"
+                        "  L: Load\n"
+                        "  Q: Query\n"
+                        "  X: Clear" 
                         ) );
 }
 

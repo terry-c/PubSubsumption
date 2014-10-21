@@ -73,9 +73,9 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
             Serial.println( _throttleRight );
         }
 
-        // simulate Position update
-        _pPosition->_currentEncoderPositionLeft += _throttleLeft * _leftRatio;
-        _pPosition->_currentEncoderPositionRight += _throttleRight * _rightRatio;
+        // simulate Position update0
+//        _pPosition->_currentEncoderPositionLeft += _throttleLeft * _leftRatio;
+  //      _pPosition->_currentEncoderPositionRight += _throttleRight * _rightRatio;
 
         if ( _messageMask & MM_PROGRESS ) {
             Serial.print( F( "Positions set to: " ) );
@@ -132,14 +132,12 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
 }
 
 
-void LEDDriver::PrintHelp( uint8_t eventID ) 
+void LEDDriver::PrintHelp() 
 {
-    // we only handle one event, the "L" command:
-    Serial.println( F( "\nLED Emulator Control:" ) );
-    Actor::PrintHelp( 'L' );
-    Serial.println( F(  "  LD <LeftRatio> <RightRatio>: Set 'Motor' differential ratios\n"
-                        "  LL <Limit>: Set throttle change limit\n"
-                        "  LS <LeftSpeed> <RightSpeed>: Set 'Motor' speeds"
+    Actor::PrintHelp();
+    Serial.println( F(  "  D <LeftRatio> <RightRatio>: Set 'Motor' differential ratios\n"
+                        "  L <Limit>: Set throttle change limit\n"
+                        "  S <LeftSpeed> <RightSpeed>: Set 'Motor' speeds"
                         ) );
 }
 

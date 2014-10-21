@@ -47,18 +47,24 @@ void Director::Update()
             _controlParams.ControlledBy( this );
         }
         else {
-            // reset the flag and send it down the line
+            // not inhibiting, let someone else have a chance for a change
             _controlParams.ControlledBy( NULL );
         }
+
+        // add a visual divider at the beginning of the subsumption chain
         IF_MSG( MM_PROGRESS ) {
             Serial.println( F( "\n----" ) );
         }
+
+        // send the event down the chain
         publish( _pFirstSubscriber, &notification );
 
+#ifdef USE_CSV
         // CSV state change.  If we've done headings, move on to data.
         if ( _controlParams.PrintingCsvHeadings() ) {
             _controlParams.PrintCsvData();
         }
+#endif
 
         if ( _controlParams.PrintingCsv() ) {
             Serial.println();
@@ -69,16 +75,13 @@ void Director::Update()
     }
 }
 
-void Director::PrintHelp( uint8_t eventID ) 
+void Director::PrintHelp() 
 {
-
-    // we only handle one event, the "D" command:
-    Serial.println( F( "\nDirector:" ) );
-    Actor::PrintHelp( 'D' );
-    Serial.println( F(  "  DI <ms>: set interval ms\n"
-                        "  DG : Go\n"
-                        "  DL : Start CSV Logging\n"
-                        "  DS : stop"
+    Actor::PrintHelp();
+    Serial.println( F(  "  I <ms>: set interval ms\n"
+                        "  G : Go\n"
+                        "  L : Start CSV Logging\n"
+                        "  S : stop"
                         ) );
 }
 

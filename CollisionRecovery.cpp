@@ -147,7 +147,7 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
             _StateSpeeds[0] = 0;
             for ( int ixArg = 0; ixArg <= 3; ixArg++ ) {
                 _StateSpeeds[ixArg + 1] = pArgs->nParams[ixArg];
-                if ( _messageMask & MM_PROGRESS ) {
+                if ( _messageMask & MM_RESPONSES ) {
                     Serial.print( "Bump speed " );
                     Serial.print( ixArg + 1 );
                     Serial.print( " set to " );
@@ -160,7 +160,7 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
             _StateTimes[0] = 0;
             for ( int ixArg = 0; ixArg <= 3; ixArg++ ) {
                 _StateTimes[ixArg + 1] = pArgs->nParams[ixArg];
-                if ( _messageMask & MM_PROGRESS ) {
+                if ( _messageMask & MM_RESPONSES ) {
                     Serial.print( "Bump time " );
                     Serial.print( ixArg + 1 );
                     Serial.print( " set to " );
@@ -171,32 +171,30 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
     }
 }
 
-void CollisionRecovery::PrintHelp( uint8_t eventID ) 
+void CollisionRecovery::PrintHelp() 
 { 
-    Serial.println( F( "\nCollision Recovery" ) );
-    Actor::PrintHelp( 'B' );
-    Serial.println( F(  "  BL: Simulate bump left\n"
-                        "  BR: Simulate bump right\n"
-                        "  BS: <s1> <s2> <s3> <s4> Speeds (throttle) \n"
-                        "  BT: <t1> <t2> <t3> <t4> Times (ticks)" 
+    Actor::PrintHelp();
+    Serial.println( F(  "  L: Simulate bump left\n"
+                        "  R: Simulate bump right\n"
+                        "  S: <s1> <s2> <s3> <s4> Speeds (throttle) \n"
+                        "  T: <t1> <t2> <t3> <t4> Times (ticks)" 
                         ) ); 
 }
 
 
 void CollisionRecovery::PrintSpecificParameterValues()
 {
-    Serial.println( F( "Collision Recovery" ) );
+    Serial.println( F( "\t\tStop\tBack\tTurn\tFwd" ) );
     Serial.print( F( " Speeds:" ) );
-    for ( int ix = 0; ix < 4; ix++ ) {
+    for ( int ix = 1; ix <= 4; ix++ ) {
         Serial.print( '\t' );
         Serial.print( _StateSpeeds[ ix ] );
     }
     Serial.println();
 
-    Serial.print( F( " Times:" ) );
-    for ( int ix = 0; ix < 4; ix++ ) {
+    Serial.print( F( " Times: " ) );
+    for ( int ix = 1; ix <= 4; ix++ ) {
         Serial.print( '\t' );
-        Serial.print( _StateSpeeds[ ix ] );
+        Serial.print( _StateTimes[ ix ] );
     }
-    Serial.println();
 }

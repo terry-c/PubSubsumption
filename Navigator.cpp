@@ -160,6 +160,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
 
     IF_CSV( MM_CSVBASIC ) {
         CSV_OUT( _waypointNumber );
+#ifdef USE_CSV
         if ( _pCurrentWaypoint || ( pControlParams->PrintingCsvHeadings() ) ) {
             CSV_OUT( _pCurrentWaypoint->_x );
             CSV_OUT( _pCurrentWaypoint->_y );
@@ -167,6 +168,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
         else {  // hard-code dummy output if no waypoint*
             Serial.print( F( "-1\t-1\t" ) );
         }
+#endif
         CSV_OUT( distanceToWaypoint );
         CSV_OUT( headingToWaypoint );
         CSV_OUT( headingError );
@@ -208,12 +210,11 @@ void Navigator::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
 }
 
 
-void Navigator::PrintHelp( uint8_t eventID ) 
+void Navigator::PrintHelp() 
 {
-    Serial.println( F( "\nNavigator Control:" ) );
-    Actor::PrintHelp( 'N' );
-    Serial.println( F(  "  NT <degrees> : set heading tolerance\n"
-                        "  NR : restart at first waypoint" 
+    Actor::PrintHelp();
+    Serial.println( F(  "  T <degrees> : set heading tolerance\n"
+                        "  R : restart at first waypoint" 
                         ) );
 }
 

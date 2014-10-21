@@ -8,6 +8,7 @@ Written by Terry Crook in collaboration with Clayton Dean, and based upon the
 Subsumption Architecture as described by David P. Anderson.
 */
 
+//#include <Encoder.h>
 #include <CollisionAvoidance.h>
 #include "CommonDefs.h"
 #include <CommandDispatcher.h>
@@ -29,10 +30,22 @@ Subsumption Architecture as described by David P. Anderson.
 uint32_t* _pEncoderPositionLeft;
 uint32_t* _pEncoderPositionRight;
 
+//#define ROVER5_DUE
+#ifdef ROVER5_DUE
+
 uint8_t _encoderLeftPinA = 49;
 uint8_t _encoderLeftPinB = 47;
 uint8_t _encoderRightPinA = 53;
 uint8_t _encoderRightPinB = 51;
+#else   // Pro Micro
+
+uint8_t _encoderLeftPinA = 2;
+uint8_t _encoderLeftPinB = 10;
+uint8_t _encoderRightPinA = 3;
+uint8_t _encoderRightPinB = 12;
+
+#endif
+
 
 // our publishers
 CommandDispatcher   dispatcher;
@@ -47,6 +60,7 @@ Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pE
 //
 // LEDDriver is the last Behavior, consuming any adjustments made by higher-priority behaviors.
 // LEDDriver is a motor simulator
+#define USE_LED_EMULATOR
 #ifdef USE_LED_EMULATOR
 LEDDriver          led( 9, 6, 5, 3, &dispatcher, &position );
 #else
@@ -71,44 +85,18 @@ void setup()
     pinMode( _encoderRightPinA, INPUT );
     pinMode( _encoderRightPinB, INPUT );
 
-    pinMode( 39, OUTPUT );
-    digitalWrite( 39, LOW );
+    //pinMode( 39, OUTPUT );
+    //digitalWrite( 39, LOW );
 
+#ifdef ROVER5_DUE
     attachInterrupt( _encoderLeftPinA , encoderLeftA, RISING );
 //    attachInterrupt( _encoderLeftPinB , encoderLeftA, RISING );
     attachInterrupt( _encoderRightPinA, encoderRightA, RISING );
 //    attachInterrupt( _encoderRightPinB, encoderRightA, RISING );
-
-    /*
-    char* line = "--------------------";
-
-    Serial.println( line );
-    Serial.println( line );
-    Serial.println( F( "Subsumption Robot" ) );
-    Serial.println( line );
-    Serial.print( F( "Director:\t" ) );
-    Serial.println( (int) &director );
-
-    Serial.print( F( "Dispatcher:\t" ) );
-    Serial.println( (int) &dispatcher );
-
-    Serial.print( F( "Waypoints:\t" ) );
-    Serial.println( (int) &waypointManager );
-    
-    Serial.println( F( "\nDefined Actors:" ) );
-    Serial.println( line );
-    Serial.print( navigator.GetName() );
-    Serial.print( "\t" );
-    Serial.println( (int) &navigator );
-
-    Serial.print( motor.GetName() );
-    Serial.print( '\t' );
-    Serial.println( (int) &motor );
-    
-    Serial.print( bumper.GetName() );
-    Serial.print( '\t' );
-    Serial.println( (int) &bumper );
-    */
+#else // Pro Micro
+    attachInterrupt( 0, encoderLeftA, RISING );
+    attachInterrupt( 1, encoderRightA, RISING );
+#endif
 
     // subscribe Actors to the Director in reverse priority order
 
@@ -139,12 +127,9 @@ void loop()
 
 void encoderLeftA()
 {
-        digitalWrite( 39, LOW );
-
-    bool bPinA = digitalRead( _encoderLeftPinA );
-    bool bPinB = digitalRead( _encoderLeftPinB );
-
-    if ( bPinA == bPinB ) {
+    // this assumes A & B are connected to the same bit on ports D & B.  A (int0) is PD2, B is PB2
+    // compare the two channels using XOR, mask to the appropriate bit (2)
+    if ( (PIND ^ PINB) & 0x04 ) {
         (*_pEncoderPositionLeft)--;
     }
     else {
@@ -154,12 +139,9 @@ void encoderLeftA()
 
 void encoderRightA()
 {
-        digitalWrite( 39, HIGH );
-
-    bool bPinA = digitalRead( _encoderRightPinA );
-    bool bPinB = digitalRead( _encoderRightPinB );
-
-    if ( bPinA == bPinB ) {
+    // this assumes A & B are connected to the same bit on ports D & B.  A (int1) is PD3, B is PB3
+    // compare the two channels using XOR, mask to the appropriate bit (3)
+    if ( (PIND ^ PINB) & 0x08 ) {
         (*_pEncoderPositionRight)--;
     }
     else {

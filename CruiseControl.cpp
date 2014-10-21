@@ -123,6 +123,7 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
             //Serial.println( pControlParams->_throttleRight );
         }
     }
+
     IF_CSV( MM_CSVBASIC ) {
         CSV_OUT( _targetSpeedTicks );                      
         CSV_OUT( _idealPositionLeft );                     
@@ -176,11 +177,11 @@ void CruiseControl::handleCommandEvent( EventNotification* pEvent, CommandArgs* 
 }
 
 
-void CruiseControl::PrintHelp( uint8_t eventID ) 
+void CruiseControl::PrintHelp() 
 {
     // we only handle one event, the "L" command:
-    Serial.println( F( "\nCruise Control:" ) );
-    Actor::PrintHelp( 'C' );
+//    Serial.println( F( "\nCruise Control:" ) );
+    Actor::PrintHelp();
     Serial.println( F(  "  CS <Speed> : Set cruising speed (IPS)\n"
                         "  CP <kP> <kI> <kD> : Set PID coefficients" 
                         ) );

@@ -63,7 +63,7 @@ public:
     virtual void    handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
 
-    virtual void    PrintHelp( uint8_t eventID );
+    virtual void    PrintHelp();
     virtual void    PrintSpecificParameterValues();
 
 };

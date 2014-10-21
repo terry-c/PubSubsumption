@@ -86,12 +86,13 @@ void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pCo
 }
 
 
-void Position::PrintHelp( uint8_t eventID ) 
+void Position::PrintHelp() 
 {
-    // we only handle one event, the "L" command:
-    Serial.println( F( "\nPosition Control:" ) );
-//    Actor::PrintHelp( eventID );  // we don't handle any of the common Actor commands (0,1,
-    Serial.println( F(  "  PV <level> : Set verbosity level\n" 
-                        "  PR 9 : Reset position to zero" 
+    // we don't handle any of the common Actor commands (0,1, etc.)
+    Serial.print( F( "\n========\nPosition verbosity = 0x" ) );
+    Serial.println( _messageMask, HEX );
+    Serial.println( F( "\n- - -\n\nPosition Options:\n" ) );
+    Serial.println( F(  "  V <level> : Set verbosity level\n" 
+                        "  R 9 : Reset position to zero" 
                         ) );
 }

@@ -78,7 +78,7 @@ public:
     /// it sends the subsumption event to the subscribers.
     void Update();
 
-    void PrintHelp( uint8_t eventID );
+    void PrintHelp();
 
 //    virtual Subscriber* HandleEvent( EventNotification* pEvent );
 
