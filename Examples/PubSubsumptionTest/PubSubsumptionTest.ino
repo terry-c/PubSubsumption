@@ -30,13 +30,16 @@ Subsumption Architecture as described by David P. Anderson.
 uint32_t* _pEncoderPositionLeft;
 uint32_t* _pEncoderPositionRight;
 
-//#define ROVER5_DUE
+#define ROVER5_DUE
 #ifdef ROVER5_DUE
 
 uint8_t _encoderLeftPinA = 49;
 uint8_t _encoderLeftPinB = 47;
 uint8_t _encoderRightPinA = 53;
 uint8_t _encoderRightPinB = 51;
+uint8_t _encoderLeftPinXor = 45;
+uint8_t _encoderRightPinXor = 44;
+
 #else   // Pro Micro
 
 uint8_t _encoderLeftPinA = 2;
@@ -62,7 +65,7 @@ Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pE
 // LEDDriver is a motor simulator
 #define USE_LED_EMULATOR
 #ifdef USE_LED_EMULATOR
-LEDDriver          led( 9, 6, 5, 3, &dispatcher, &position );
+LEDDriver          led( 9, 6, 5, 4, &dispatcher, &position );
 #else
 MotorDriver          motor( 2, 3, 4, 5, 8, 9, 10, 11, &dispatcher, &position );
 #endif
@@ -84,15 +87,17 @@ void setup()
     pinMode( _encoderLeftPinB , INPUT );
     pinMode( _encoderRightPinA, INPUT );
     pinMode( _encoderRightPinB, INPUT );
+    pinMode( _encoderRightPinXor, INPUT );
+    pinMode( _encoderLeftPinXor, INPUT );
 
     //pinMode( 39, OUTPUT );
     //digitalWrite( 39, LOW );
 
 #ifdef ROVER5_DUE
-    attachInterrupt( _encoderLeftPinA , encoderLeftA, RISING );
-//    attachInterrupt( _encoderLeftPinB , encoderLeftA, RISING );
-    attachInterrupt( _encoderRightPinA, encoderRightA, RISING );
-//    attachInterrupt( _encoderRightPinB, encoderRightA, RISING );
+    attachInterrupt( _encoderLeftPinA , encoderLeftA, CHANGE );
+    attachInterrupt( _encoderLeftPinB , encoderLeftA, CHANGE );
+    attachInterrupt( _encoderRightPinA, encoderRightA, CHANGE );
+    attachInterrupt( _encoderRightPinB, encoderRightA, CHANGE );
 #else // Pro Micro
     attachInterrupt( 0, encoderLeftA, RISING );
     attachInterrupt( 1, encoderRightA, RISING );
@@ -125,6 +130,53 @@ void loop()
 
 }
 
+#ifdef ROVER5_DUE
+// On Rover5, we have enough interrupts to capture both A & B transitions.
+// In addition, the Rover5 driver board includes an XOR of A and B, which we can 
+// use to determine direction.  On every A transition, the XOR will be high for
+// one direction and low for the other direction.  On every B transition, the
+// direction/XOR relationship will be reversed.
+void encoderLeftA()
+{
+    if ( digitalRead( _encoderLeftPinXor ) ) {
+        (*_pEncoderPositionLeft)--;
+    }
+    else {
+        (*_pEncoderPositionLeft)++;
+    }
+}
+
+void encoderRightA()
+{
+    if ( digitalRead( _encoderRightPinXor ) ) {
+        (*_pEncoderPositionRight)--;
+    }
+    else {
+        (*_pEncoderPositionRight)++;
+    }
+}
+
+void encoderLeftB()
+{
+    if ( !digitalRead( _encoderLeftPinXor ) ) {
+        (*_pEncoderPositionLeft)--;
+    }
+    else {
+        (*_pEncoderPositionLeft)++;
+    }
+}
+
+void encoderRightB()
+{
+    if ( !digitalRead( _encoderRightPinXor ) ) {
+        (*_pEncoderPositionRight)--;
+    }
+    else {
+        (*_pEncoderPositionRight)++;
+    }
+}
+
+#else
 void encoderLeftA()
 {
     // this assumes A & B are connected to the same bit on ports D & B.  A (int0) is PD2, B is PB2
@@ -148,3 +200,4 @@ void encoderRightA()
         (*_pEncoderPositionRight)++;
     }
 }
+#endif
