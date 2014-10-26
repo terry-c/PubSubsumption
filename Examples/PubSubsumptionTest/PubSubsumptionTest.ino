@@ -17,14 +17,13 @@ Subsumption Architecture as described by David P. Anderson.
 #define WHEEL_SPACING
 #define ENCODER_TICKS_PER_REVOLUTION
 
-//#include <Encoder.h>
-#include <CollisionAvoidance.h>
 #include "CommonDefs.h"
 #include <CommandDispatcher.h>
 #include <CommandSubscriber.h>
 #include <Actor.h>
 #include <CruiseControl.h>
 #include <WaypointManager.h>
+#include <CollisionAvoidance.h>
 #include <CollisionRecovery.h>
 #include <Position.h>
 #include <PubSub.h>
