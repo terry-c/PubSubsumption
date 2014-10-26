@@ -52,7 +52,7 @@ class Publisher
 public:
 
     // this is the event we will publish
-    EventNotification notification;
+    EventNotification _notification;
 
     // subscribers call this function to subscribe to the given event
     virtual Subscriber* Subscribe( Subscriber* pSub, uint8_t eventID );

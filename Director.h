@@ -32,7 +32,7 @@ class ControlParams
 
 public:
 
-    ControlParams() : _throttleLeft( 0 ), _throttleRight( 0 ), _csvState( eCsvIdle ), _csvDelimiter( '\t' )                         {};
+    ControlParams() : _throttleLeft( 0 ), _throttleRight( 0 ), _csvState( eCsvIdle ), _csvDelimiter( '\t' ), _stepIntervalMillis( 1000 ) {};
 
     void        ControlledBy( Actor* pActor )           { _pTakenBy = pActor; }
     Actor*      ActorInControl()                        { return _pTakenBy; }

@@ -15,8 +15,8 @@ CommandDispatcher::CommandDispatcher()
 {
     _menuModeCmdChar = 0;
 
-    notification.pPublisher = this;
-    notification.pData = &_args;
+    _notification.pPublisher = this;
+    _notification.pData = &_args;
 
     memset(_args.nParams, 0, sizeof(_args.nParams) );
     memset(_args.fParams, 0, sizeof(_args.fParams) );
@@ -182,8 +182,8 @@ Subscriber* CommandDispatcher::dispatchCommand( char cmdChar, eDispatchAction eA
     if ( pSubscriber ) {
         switch ( eAction ) {
         case eNotify :
-            notification.eventID = cmdChar;
-            publish( pSubscriber, &notification );
+            _notification.eventID = cmdChar;
+            publish( pSubscriber, &_notification );
             break;
         case eHelpSummary :
             Serial.print( F( "  " ) );

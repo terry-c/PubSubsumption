@@ -14,14 +14,13 @@ Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _
 {
     _pName = "Director";
 
-
     // we'll turn on the LED during execution of the subsumption chain
     // to give some idea of how much time it takes
     pinMode( 13, OUTPUT );
 
     _tickTimeMS = millis() + _controlParams.GetInterval();
 
-    notification.pData = &_controlParams;
+    _notification.pData = &_controlParams;
 
     SubscribeTo( pCD, 'D' );
 }
@@ -57,7 +56,7 @@ void Director::Update()
         }
 
         // send the event down the chain
-        publish( _pFirstSubscriber, &notification );
+        publish( _pFirstSubscriber, &_notification );
 
 #ifdef USE_CSV
         // CSV state change.  If we've done headings, move on to data.
