@@ -22,7 +22,8 @@ Position::Position( CommandDispatcher* pCD, Director* pD,
     SubscribeTo( pCD, 'P' );
 
     // compute conversion factors
-    // ticks per inch
+    _EncoderTicksPerInch = ticksPerRev / (wheelDiameter * PI);
+    _WheelSpacingInches = wheelSpacing;
 }
 
 
@@ -45,19 +46,14 @@ void Position::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
     }
 }
 
-/// todo: make these member variables passed into ctor
-#define EncoderTicksPerInch 99.44
-#define WheelSpacingInches 10.0
 
 void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
     // first, we compute our current position (x, y, theta)
-    _leftInches      = _currentEncoderPositionLeft / EncoderTicksPerInch;
-    _rightInches     = _currentEncoderPositionRight / EncoderTicksPerInch;
+    _leftInches      = _currentEncoderPositionLeft / _EncoderTicksPerInch;
+    _rightInches     = _currentEncoderPositionRight / _EncoderTicksPerInch;
     _distanceInches  = (_leftInches + _rightInches) / 2.0;
-//    _theta           = fmod( ( (_leftInches - _rightInches) / WheelSpacingInches) + PI, PI ) - PI;
-//    _theta           = atan( tan( (_leftInches - _rightInches) / WheelSpacingInches ) );
-    _theta           = (_leftInches - _rightInches) / WheelSpacingInches;
+    _theta           = (_leftInches - _rightInches) / _WheelSpacingInches;
     _xInches         = _distanceInches * sin( _theta );
     _yInches         = _distanceInches * cos( _theta );
     _headingDegrees  = _theta * (180.0 / PI);

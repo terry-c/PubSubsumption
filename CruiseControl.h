@@ -62,9 +62,9 @@ class CruiseControl : public Actor
     //int         _lastErrorRight;
 
     float       _targetSpeedIPS;
-    float       _targetSpeedTicks;
+    float       _targetSpeedTicksPerSecond;
 
-    float       _IPS2Ticks;
+    float       _EncoderTicksPerInch;
 
     bool        _bCruising;
 
@@ -76,7 +76,7 @@ class CruiseControl : public Actor
 
 
 public:
-    CruiseControl( CommandDispatcher* pCD, Position* pOD, float IPS2Ticks );
+    CruiseControl( CommandDispatcher* pCD, Position* pOD, float ticksPerRev, float wheelDiameter );
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
     virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );

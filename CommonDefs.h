@@ -19,7 +19,6 @@ Subsumption Architecture as described by David P. Anderson.
 
 #define IF_MSG( MASK ) if ( _messageMask & MASK )
 
-//#define USE_CSV
 #ifdef USE_CSV
 
 /// Determine whether to output CSV headings or data

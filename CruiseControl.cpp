@@ -10,10 +10,10 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include <CruiseControl.h>
 
-CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD, float IPS2Ticks ) : Actor( pCD ) 
+CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD, float ticksPerRev, float wheelDiameter ) : Actor( pCD ) 
 {
     _pPosition = pOD;
-    _IPS2Ticks = IPS2Ticks;
+    _EncoderTicksPerInch = ticksPerRev / (wheelDiameter * PI);
 
     _kP = 1.0;
     _kI = 0.5;
@@ -42,6 +42,8 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
         else {  // nobody else cares, so it's our turn
             pControlParams->ControlledBy( this );
 
+            float targetSpeedTicksPerInterval = ( _targetSpeedTicksPerSecond * pControlParams->GetInterval() ) / 1000;
+
             if ( _bCruising ) {    // this means we were already cruising
                 // check our position and calculate error values
 
@@ -50,8 +52,8 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
                 int deltaRight = _pPosition->_currentEncoderPositionRight - _prevPositionRight;
 
                 // error is the difference between how far we expected to move and how far we actually moved.
-                int errorLeft = _targetSpeedTicks - deltaLeft;
-                int errorRight = _targetSpeedTicks - deltaRight;
+                int errorLeft = targetSpeedTicksPerInterval - deltaLeft;
+                int errorRight = targetSpeedTicksPerInterval - deltaRight;
 
                 // Derivative uses the change in error between the last two intervals
                 int deltaErrorLeft = _prevErrorLeft - errorLeft;
@@ -72,7 +74,7 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
                     PRINT_VAR( _pPosition->_currentEncoderPositionLeft );
                     PRINT_VAR( _prevPositionLeft );
                     PRINT_VAR( deltaLeft );
-                    PRINT_VAR( _targetSpeedTicks );
+                    PRINT_VAR( targetSpeedTicksPerInterval );
                     PRINT_VAR( errorLeft );
                     PRINT_VAR( cumulativeErrorLeft );
                     PRINT_VAR( _kI * cumulativeErrorLeft );
@@ -81,14 +83,14 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
 /*
                 if ( _messageMask & MM_CSVBASIC && pControlParams->_csvState != ControlParams::eCsvIdle ) {
                     if ( pControlParams->PrintingCsvHeadings() ) {
-                        Serial.print( F("_idealPositionLeft,_pPosition->_currentEncoderPositionLeft,_prevPositionLeft,deltaLeft,_targetSpeedTicks,errorLeft,cumulativeErrorLeft,_kI * cumulativeErrorLeft,") );
+                        Serial.print( F("_idealPositionLeft,_pPosition->_currentEncoderPositionLeft,_prevPositionLeft,deltaLeft,targetSpeedTicksPerInterval,errorLeft,cumulativeErrorLeft,_kI * cumulativeErrorLeft,") );
                     }
                     else {
                         Serial.print( _idealPositionLeft );                        Serial.print( pControlParams->_csvDelimiter );
                         Serial.print( _pPosition->_currentEncoderPositionLeft );   Serial.print( pControlParams->_csvDelimiter );
                         Serial.print( _prevPositionLeft );                         Serial.print( pControlParams->_csvDelimiter );
                         Serial.print( deltaLeft );                                 Serial.print( pControlParams->_csvDelimiter );
-                        Serial.print( _targetSpeedTicks );                         Serial.print( pControlParams->_csvDelimiter );
+                        Serial.print( targetSpeedTicksPerInterval );                         Serial.print( pControlParams->_csvDelimiter );
                         Serial.print( errorLeft );                                 Serial.print( pControlParams->_csvDelimiter );
                         Serial.print( cumulativeErrorLeft );                       Serial.print( pControlParams->_csvDelimiter );
                         Serial.print( _kI * cumulativeErrorLeft );                 Serial.print( pControlParams->_csvDelimiter );
@@ -111,8 +113,8 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
             }
 
             // set the next ideal target positions
-            _idealPositionLeft += _targetSpeedTicks;
-            _idealPositionRight += _targetSpeedTicks;
+            _idealPositionLeft += targetSpeedTicksPerInterval;
+            _idealPositionRight += targetSpeedTicksPerInterval;
 
             // set the throttle positions.
             pControlParams->SetThrottles( _throttleLeft, _throttleRight );
@@ -125,7 +127,7 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
     }
 
     IF_CSV( MM_CSVBASIC ) {
-        CSV_OUT( _targetSpeedTicks );                      
+        CSV_OUT( targetSpeedTicksPerInterval );                      
         CSV_OUT( _idealPositionLeft );                     
         CSV_OUT( _prevPositionLeft );                      
 //        CSV_OUT( deltaLeft );                              
@@ -152,13 +154,13 @@ void CruiseControl::handleCommandEvent( EventNotification* pEvent, CommandArgs* 
             // Set the crusing speed from the command argument
             // Speed is in IPS, calculate encoder ticks per interval and use this as the target speed
             _targetSpeedIPS = pData->fParams[ 0 ];
-            _targetSpeedTicks = _IPS2Ticks * _targetSpeedIPS;
+            _targetSpeedTicksPerSecond = _EncoderTicksPerInch * _targetSpeedIPS;
             if ( _messageMask & MM_RESPONSES ) {
                 Serial.println( F( "\nCruise Speed set to:" ) );
                 Serial.print( F( " IPS:\t" ) );
                 Serial.println( _targetSpeedIPS );
                 Serial.print( F( " Ticks:\t" ) );
-                Serial.println( _targetSpeedTicks );
+                Serial.println( _targetSpeedTicksPerSecond );
             }
             break;
         case 'P' : // Set PID parameters
@@ -182,8 +184,8 @@ void CruiseControl::PrintHelp()
     // we only handle one event, the "L" command:
 //    Serial.println( F( "\nCruise Control:" ) );
     Actor::PrintHelp();
-    Serial.println( F(  "  CS <Speed> : Set cruising speed (IPS)\n"
-                        "  CP <kP> <kI> <kD> : Set PID coefficients" 
+    Serial.println( F(  "  S <Speed> : Set cruising speed (IPS)\n"
+                        "  P <kP> <kI> <kD> : Set PID coefficients" 
                         ) );
 }
 

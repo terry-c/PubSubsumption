@@ -10,7 +10,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include "Director.h"
 
-Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _pCD( pCD ), _intervalMS( interval ), _bEnabled( true ), _bInhibit( true )
+Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _pCD( pCD ), /*_intervalMS( interval ),*/ _bEnabled( true ), _bInhibit( true )
 {
     _pName = "Director";
 
@@ -19,7 +19,7 @@ Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _
     // to give some idea of how much time it takes
     pinMode( 13, OUTPUT );
 
-    _tickTimeMS = millis() + _intervalMS;
+    _tickTimeMS = millis() + _controlParams.GetInterval();
 
     notification.pData = &_controlParams;
 
@@ -40,7 +40,7 @@ void Director::Update()
     if ( millis() >= _tickTimeMS ) {
         digitalWrite( 13, HIGH );   // turn the LED on for the duration of this event to give a visual indication of the time required.
 
-        _tickTimeMS += _intervalMS;
+        _tickTimeMS += _controlParams.GetInterval();
 
         if ( _bInhibit ) {
             _controlParams.SetThrottles( 0, 0 );
@@ -90,10 +90,10 @@ void Director::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
 {
     switch ( pArgs->inputBuffer[1] ) {
         case 'I' : // set interval
-            _intervalMS = pArgs->nParams[0];
+            _controlParams.SetInterval( pArgs->nParams[0] );
             if ( _messageMask & MM_RESPONSES ) {
                 Serial.print( F( "Subsumption Interval milliseconds = " ) );
-                Serial.println( _intervalMS );
+                Serial.println( _controlParams.GetInterval() );
             }
             break;
         case 'S' :  // Stop -- inhibit all Actors

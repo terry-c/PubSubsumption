@@ -28,6 +28,7 @@ class ControlParams
     eCsvState   _csvState;
     char        _csvDelimiter;
 
+    uint16_t    _stepIntervalMillis;
 
 public:
 
@@ -50,6 +51,8 @@ public:
     void        PrintCsvHeadings()                      { _csvState = eCsvHeadings; }
     void        PrintCsvData()                          { _csvState = eCsvData; }
     void        StopCsvOutput()                         { _csvState = eCsvIdle; }
+    uint16_t    GetInterval()                           { return _stepIntervalMillis; }
+    uint16_t    SetInterval( uint16_t interval )        { _stepIntervalMillis = interval; }
 };
 
 
@@ -62,7 +65,7 @@ class Director : public Publisher, public Actor
     bool            _bEnabled;
     bool            _bInhibit;
 
-    uint16_t        _intervalMS;
+//    uint16_t        _intervalMS;
     unsigned long   _tickTimeMS;
 
     // ControlParams object which is passed to all Behaviors through the Publisher's EventNotification.

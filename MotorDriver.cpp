@@ -145,6 +145,6 @@ void MotorDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pA
 void MotorDriver::PrintHelp() 
 {
     Actor::PrintHelp();
-    Serial.println( F( "  MS <LeftSpeed> <RightSpeed>: Set 'Motor' speeds" ) );
+    Serial.println( F( "  S <LeftSpeed> <RightSpeed>: Set 'Motor' speeds" ) );
 }
 

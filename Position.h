@@ -28,9 +28,12 @@ Subsumption Architecture as described by David P. Anderson.
 /// never subsume.  Instead, it takes a snapshot of the encoder positions and performs all the calculations to determine
 /// location, orientation, speed, etc.  These values are made available to any subsequent Actor which needs this information.
 /// This way, all these calculations are performed in one place, at one time, using the position values captured in the
-/// snapshot, so there is no skew caused by sampling at different times.
+/// snapshot, to minimize skew caused by sampling at different times.
 class Position : public Actor
 {
+    float   _EncoderTicksPerInch;
+    float   _WheelSpacingInches;
+
 public:
 
     // leftPosition and rightPosition are 

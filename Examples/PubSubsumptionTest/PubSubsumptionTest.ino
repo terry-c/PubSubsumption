@@ -8,6 +8,15 @@ Written by Terry Crook in collaboration with Clayton Dean, and based upon the
 Subsumption Architecture as described by David P. Anderson.
 */
 
+//#define USE_LED_EMULATOR
+#define ROVER5_DUE
+#define USE_CSV
+
+// Platform geometry defines
+#define WHEEL_DIAMETER 
+#define WHEEL_SPACING
+#define ENCODER_TICKS_PER_REVOLUTION
+
 //#include <Encoder.h>
 #include <CollisionAvoidance.h>
 #include "CommonDefs.h"
@@ -30,22 +39,21 @@ Subsumption Architecture as described by David P. Anderson.
 uint32_t* _pEncoderPositionLeft;
 uint32_t* _pEncoderPositionRight;
 
-#define ROVER5_DUE
 #ifdef ROVER5_DUE
 
-uint8_t _encoderLeftPinA = 49;
-uint8_t _encoderLeftPinB = 47;
-uint8_t _encoderRightPinA = 53;
-uint8_t _encoderRightPinB = 51;
-uint8_t _encoderLeftPinXor = 45;
-uint8_t _encoderRightPinXor = 44;
+uint8_t _pinLeftEncoderA = 49;
+uint8_t _pinLeftEncoderB = 47;
+uint8_t _pinRightEncoderA = 53;
+uint8_t _pinRightEncoderB = 51;
+uint8_t _pinLeftEncoderXor = 45;//grn,brn,ch3int
+uint8_t _pinRightEncoderXor = 44;//red,grn,ch4int
 
 #else   // Pro Micro
 
-uint8_t _encoderLeftPinA = 2;
-uint8_t _encoderLeftPinB = 10;
-uint8_t _encoderRightPinA = 3;
-uint8_t _encoderRightPinB = 12;
+uint8_t _pinLeftEncoderA = 2;
+uint8_t _pinLeftEncoderB = 10;
+uint8_t _pinRightEncoderA = 3;
+uint8_t _pinRightEncoderB = 12;
 
 #endif
 
@@ -56,14 +64,13 @@ Director            director( &dispatcher, 1000 );    // 1000 ms interval
 
 // other entities
 WaypointManager     waypointManager( &dispatcher );
-Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pEncoderPositionRight, 123.45, 7.25, 12.34 );     // this carries the current positions of all motors.
+Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pEncoderPositionRight, 333, 2.5, 7.25 );     // this carries the current positions of all motors.
 
 // Actors.  These are objects which participate in the Subsumption chain.
 // They will be subscribed to Director command events in setup().
 //
 // LEDDriver is the last Behavior, consuming any adjustments made by higher-priority behaviors.
 // LEDDriver is a motor simulator
-#define USE_LED_EMULATOR
 #ifdef USE_LED_EMULATOR
 LEDDriver          led( 9, 6, 5, 4, &dispatcher, &position );
 #else
@@ -77,27 +84,27 @@ Navigator           navigator(&dispatcher, &position, &waypointManager);
 CollisionRecovery   bumper( &dispatcher, 0, 0 );
 
 // CruiseControl maintains the current heading and speed
-CruiseControl       cruise( &dispatcher, &position, 0.1234 ); // last param is a factor for converting from IPS to encoder ticks per interval
+CruiseControl       cruise( &dispatcher, &position, 333, 2.5 );
 
 void setup()
 {
     Serial.begin(115200);
 
-    pinMode( _encoderLeftPinA , INPUT );
-    pinMode( _encoderLeftPinB , INPUT );
-    pinMode( _encoderRightPinA, INPUT );
-    pinMode( _encoderRightPinB, INPUT );
-    pinMode( _encoderRightPinXor, INPUT );
-    pinMode( _encoderLeftPinXor, INPUT );
+    pinMode( _pinLeftEncoderA , INPUT );
+    pinMode( _pinLeftEncoderB , INPUT );
+    pinMode( _pinRightEncoderA, INPUT );
+    pinMode( _pinRightEncoderB, INPUT );
+    pinMode( _pinRightEncoderXor, INPUT );
+    pinMode( _pinLeftEncoderXor, INPUT );
 
     //pinMode( 39, OUTPUT );
     //digitalWrite( 39, LOW );
 
 #ifdef ROVER5_DUE
-    attachInterrupt( _encoderLeftPinA , encoderLeftA, CHANGE );
-    attachInterrupt( _encoderLeftPinB , encoderLeftA, CHANGE );
-    attachInterrupt( _encoderRightPinA, encoderRightA, CHANGE );
-    attachInterrupt( _encoderRightPinB, encoderRightA, CHANGE );
+    attachInterrupt( _pinLeftEncoderA , encoderLeftA, CHANGE );
+    attachInterrupt( _pinLeftEncoderB , encoderLeftB, CHANGE );
+    attachInterrupt( _pinRightEncoderA, encoderRightA, CHANGE );
+    attachInterrupt( _pinRightEncoderB, encoderRightB, CHANGE );
 #else // Pro Micro
     attachInterrupt( 0, encoderLeftA, RISING );
     attachInterrupt( 1, encoderRightA, RISING );
@@ -138,7 +145,7 @@ void loop()
 // direction/XOR relationship will be reversed.
 void encoderLeftA()
 {
-    if ( digitalRead( _encoderLeftPinXor ) ) {
+    if ( ! digitalRead( _pinLeftEncoderXor ) ) {
         (*_pEncoderPositionLeft)--;
     }
     else {
@@ -148,7 +155,7 @@ void encoderLeftA()
 
 void encoderRightA()
 {
-    if ( digitalRead( _encoderRightPinXor ) ) {
+    if ( ! digitalRead( _pinRightEncoderXor ) ) {
         (*_pEncoderPositionRight)--;
     }
     else {
@@ -158,7 +165,7 @@ void encoderRightA()
 
 void encoderLeftB()
 {
-    if ( !digitalRead( _encoderLeftPinXor ) ) {
+    if ( digitalRead( _pinLeftEncoderXor ) ) {
         (*_pEncoderPositionLeft)--;
     }
     else {
@@ -168,7 +175,7 @@ void encoderLeftB()
 
 void encoderRightB()
 {
-    if ( !digitalRead( _encoderRightPinXor ) ) {
+    if ( digitalRead( _pinRightEncoderXor ) ) {
         (*_pEncoderPositionRight)--;
     }
     else {
