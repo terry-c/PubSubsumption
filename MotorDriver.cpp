@@ -32,17 +32,8 @@ MotorDriver::MotorDriver(
                                                 _pPosition( pOD )
 {
     _pName = "Motor";
-    // note that pNextSub is being overwritten here, but this should not be a problem as long as
-    // the next subscriber for each event is the same, which it should be here.
-    // if necessary, these could be separate variables, and the appropriate pointer would need
-    // to be returned in HandleEvent().
-    SubscribeTo( pCD, 'M' );    // All our commands begin with "L"
 
-    //LED_On_duration_ms = 0;
-    //LED_Off_duration_ms = 0;
- 
-    //LED_Change_Time = 0;
-    //LED_State = LOW;
+    SubscribeTo( pCD, 'M' );    // All our commands begin with "L"
     
     pinMode( _pwmPinLF, OUTPUT );
     pinMode( _pwmPinRF, OUTPUT );
@@ -52,19 +43,6 @@ MotorDriver::MotorDriver(
     pinMode( _dirPinRF, OUTPUT );
     pinMode( _dirPinLR, OUTPUT );
     pinMode( _dirPinRR, OUTPUT );
-}
-
-
-void MotorDriver::Update( void ) {
-/*    if ( LED_On_duration_ms > 0 ) {
-        unsigned int currTime = millis();
-        if ( currTime > LED_Change_Time ) {
-            LED_State = !LED_State;
-            digitalWrite( _pwmPin, LED_State );
-            LED_Change_Time = currTime + (LED_State == LOW ? LED_Off_duration_ms : LED_On_duration_ms);
-        }
-    }
-*/
 }
 
 
@@ -97,17 +75,8 @@ void MotorDriver::handleControlEvent( EventNotification* pEvent, ControlParams* 
             Serial.print( _throttleLeft );
             Serial.print( '/' );
             Serial.println( _throttleRight );
-        }
-
-        if ( _messageMask & MM_INFO ) {
-            //Serial.print( F( "Positions set to: " ) );
-            //Serial.print( _pPosition->_currentEncoderPositionLeft );
-            //Serial.print( '/' );
-            //Serial.println( _pPosition->_currentEncoderPositionRight );
-
             PRINT_VAR( bReverseLeft );
             PRINT_VAR( bReverseRight );
-            
         }
     }
 }
@@ -135,7 +104,6 @@ void MotorDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pA
                     Serial.print( leftSpeed ); Serial.print( '\t' );
                     Serial.println( rightSpeed );
                 }
-
             }
             break;
     }

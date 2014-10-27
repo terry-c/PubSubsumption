@@ -9,7 +9,7 @@ Subsumption Architecture as described by David P. Anderson.
 */
 
 //#define USE_LED_EMULATOR
-#define ROVER5_DUE
+//#define ROVER5_DUE
 #define USE_CSV
 
 // Platform geometry defines

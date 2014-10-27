@@ -49,8 +49,7 @@ public:
         uint8_t pwmPinRF, uint8_t dirPinRF,
         
         CommandDispatcher* pCD, Position* pOD);
-    void                Update( void );
-//    virtual Subscriber* HandleEvent(EventNotification* pEvent);
+
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
     virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 

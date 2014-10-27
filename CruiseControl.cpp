@@ -26,7 +26,6 @@ CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD, float ticks
 }
 
 
-
 // if we were not already cruising, but have just assumed control (i.e., no other
 // behavior has asserted itself this interval), note the Position readings so 
 // we can maintain our heading by keeping the same differential.

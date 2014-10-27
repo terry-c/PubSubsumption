@@ -70,9 +70,9 @@ void Director::Update()
         }
 
         digitalWrite( 13, LOW );
-//        Serial.println( millis() - ( _tickTimeMS - _intervalMS) );
     }
 }
+
 
 void Director::PrintHelp() 
 {
