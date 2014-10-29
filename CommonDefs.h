@@ -15,7 +15,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 /// Print the value of the given expression, using the expression text as a label.
 /// Uses the F() macro to print strings directly from Program Memory without using RAM
-#define PRINT_VAR( x ) Serial.print( F( #x " = " ) ); Serial.println( x );
+#define PRINT_VAR( x ) Serial.print( F( #x " =\t" ) ); Serial.println( x );
 
 #define IF_MSG( MASK ) if ( _messageMask & MASK )
 
