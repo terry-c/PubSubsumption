@@ -8,7 +8,7 @@ Written by Terry Crook in collaboration with Clayton Dean, and based upon the
 Subsumption Architecture as described by David P. Anderson.
 */
 
-//#define USE_LED_EMULATOR
+#define USE_LED_EMULATOR
 //#define ROVER5_DUE
 #define USE_CSV
 
@@ -71,9 +71,9 @@ Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pE
 // LEDDriver is the last Behavior, consuming any adjustments made by higher-priority behaviors.
 // LEDDriver is a motor simulator
 #ifdef USE_LED_EMULATOR
-LEDDriver          led( 9, 6, 5, 4, &dispatcher, &position );
+LEDDriver           led( 9, 6, 5, 10, &dispatcher, &position );
 #else
-MotorDriver          motor( 2, 3, 4, 5, 8, 9, 10, 11, &dispatcher, &position );
+MotorDriver         motor( 2, 3, 4, 5, 8, 9, 10, 11, &dispatcher, &position );
 #endif
 
 // Navigator keeps us on course toward the next waypoint
@@ -89,15 +89,14 @@ void setup()
 {
     Serial.begin(115200);
 
+#ifndef USE_LED_EMULATOR
     pinMode( _pinLeftEncoderA , INPUT );
     pinMode( _pinLeftEncoderB , INPUT );
     pinMode( _pinRightEncoderA, INPUT );
     pinMode( _pinRightEncoderB, INPUT );
     pinMode( _pinRightEncoderXor, INPUT );
     pinMode( _pinLeftEncoderXor, INPUT );
-
-    //pinMode( 39, OUTPUT );
-    //digitalWrite( 39, LOW );
+#endif
 
 #ifdef ROVER5_DUE
     attachInterrupt( _pinLeftEncoderA , encoderLeftA, CHANGE );

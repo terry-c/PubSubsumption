@@ -74,8 +74,8 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
         }
 
         // simulate Position update0
-//        _pPosition->_currentEncoderPositionLeft += _throttleLeft * _leftRatio;
-  //      _pPosition->_currentEncoderPositionRight += _throttleRight * _rightRatio;
+        _pPosition->_currentEncoderPositionLeft += _throttleLeft * _leftRatio;
+        _pPosition->_currentEncoderPositionRight += _throttleRight * _rightRatio;
 
         if ( _messageMask & MM_PROGRESS ) {
             Serial.print( F( "Positions set to: " ) );
