@@ -13,9 +13,9 @@ Subsumption Architecture as described by David P. Anderson.
 #define USE_CSV
 
 // Platform geometry defines
-#define WHEEL_DIAMETER 
-#define WHEEL_SPACING
-#define ENCODER_TICKS_PER_REVOLUTION
+#define WHEEL_DIAMETER                  2.5
+#define WHEEL_SPACING                   7.25
+#define ENCODER_TICKS_PER_REVOLUTION    333
 
 #include "CommonDefs.h"
 #include <CommandDispatcher.h>
@@ -63,7 +63,7 @@ Director            director( &dispatcher, 1000 );    // 1000 ms interval
 
 // other entities
 WaypointManager     waypointManager( &dispatcher );
-Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pEncoderPositionRight, 333, 2.5, 7.25 );     // this carries the current positions of all motors.
+Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pEncoderPositionRight, TicksPerInch( ENCODER_TICKS_PER_REVOLUTION, WHEEL_DIAMETER ), WHEEL_SPACING );     // this carries the current positions of all motors.
 
 // Actors.  These are objects which participate in the Subsumption chain.
 // They will be subscribed to Director command events in setup().
@@ -71,19 +71,19 @@ Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pE
 // LEDDriver is the last Behavior, consuming any adjustments made by higher-priority behaviors.
 // LEDDriver is a motor simulator
 #ifdef USE_LED_EMULATOR
-LEDDriver           led( 9, 6, 5, 10, &dispatcher, &position );
+LEDDriver           led( 9, 6, 10, 5, &dispatcher, &position, TicksPerInch( ENCODER_TICKS_PER_REVOLUTION, WHEEL_DIAMETER ) );
 #else
 MotorDriver         motor( 2, 3, 4, 5, 8, 9, 10, 11, &dispatcher, &position );
 #endif
 
 // Navigator keeps us on course toward the next waypoint
-Navigator           navigator(&dispatcher, &position, &waypointManager);
+Navigator           navigator( &dispatcher, &position, &waypointManager );
 
 // CollisionRecovery responds to bumping into things.
 CollisionRecovery   bumper( &dispatcher, 0, 0 );
 
 // CruiseControl maintains the current heading and speed
-CruiseControl       cruise( &dispatcher, &position, 333, 2.5 );
+CruiseControl       cruise( &dispatcher, &position, TicksPerInch( ENCODER_TICKS_PER_REVOLUTION, WHEEL_DIAMETER ), WHEEL_SPACING );
 
 void setup()
 {

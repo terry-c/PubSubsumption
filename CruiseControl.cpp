@@ -10,10 +10,10 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include <CruiseControl.h>
 
-CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD, float ticksPerRev, float wheelDiameter ) : Actor( pCD ) 
+CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD, float ticksPerInch, float wheelDiameter ) : Actor( pCD ) 
 {
     _pPosition = pOD;
-    _EncoderTicksPerInch = ticksPerRev / (wheelDiameter * PI);
+    _EncoderTicksPerInch = ticksPerInch;
 
     _kP = 1.0;
     _kI = 0.5;

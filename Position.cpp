@@ -12,7 +12,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 Position::Position( CommandDispatcher* pCD, Director* pD, 
         uint32_t*& leftPosition, uint32_t*& rightPosition,  // pointers to _currentEncoderPositionLeft and _currentEncoderPositionRight
-        float ticksPerRev, float wheelDiameter, float wheelSpacing ) : Actor( pCD )
+        float ticksPerInch, float wheelSpacing ) : Actor( pCD )
 {
     leftPosition = &_currentEncoderPositionLeft;
     rightPosition = &_currentEncoderPositionRight;
@@ -22,7 +22,7 @@ Position::Position( CommandDispatcher* pCD, Director* pD,
     SubscribeTo( pCD, 'P' );
 
     // compute conversion factors
-    _EncoderTicksPerInch = ticksPerRev / (wheelDiameter * PI);
+    _EncoderTicksPerInch = ticksPerInch;
     _WheelSpacingInches = wheelSpacing;
 }
 

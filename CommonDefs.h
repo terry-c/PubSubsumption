@@ -72,3 +72,4 @@ Subsumption Architecture as described by David P. Anderson.
 //}
 
 
+#define TicksPerInch( TicksPerRev, Diameter )  ( TicksPerRev / (Diameter * PI) )

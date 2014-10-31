@@ -40,7 +40,7 @@ public:
     // for use by the global interrupt handlers which update these members.
     Position( CommandDispatcher* pCD, Director* pD, 
         uint32_t*& leftPosition, uint32_t*& rightPosition,  // pointers to _currentEncoderPositionLeft and _currentEncoderPositionRight
-        float ticksPerRev, float wheelDiameter, float wheelSpacing );
+        float ticksPerInch, float wheelSpacing );
 
     void PrintHelp();
 

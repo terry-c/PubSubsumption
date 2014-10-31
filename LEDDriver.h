@@ -31,6 +31,7 @@ class LEDDriver : public Actor
     uint8_t         ledPinLF, ledPinRF, ledPinLB, ledPinRB;
 
     Position*       _pPosition;
+    float           _ticksPerInch;
 
     int             _throttleLeft;
     int             _throttleRight;
@@ -42,7 +43,7 @@ class LEDDriver : public Actor
 
 public:
 
-    LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin, CommandDispatcher* pCD, Position* pOD);
+    LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin, CommandDispatcher* pCD, Position* pOD, float ticksPerInch );
     void                Update( void );
 //    virtual Subscriber* HandleEvent(EventNotification* pEvent);
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );

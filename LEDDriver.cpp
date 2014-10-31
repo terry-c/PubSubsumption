@@ -12,13 +12,14 @@ Subsumption Architecture as described by David P. Anderson.
 
 // LED motor emulator
 
-LEDDriver::LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin, CommandDispatcher* pCD, Position* pOD ) : 
+LEDDriver::LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin, CommandDispatcher* pCD, Position* pOD, float ticksPerInch ) : 
     Actor( pCD ),
     ledPinLF(lfpin), 
     ledPinRF(rfpin), 
     ledPinLB(lbpin), 
     ledPinRB(rbpin),
-    _pPosition( pOD )
+    _pPosition( pOD ),
+    _ticksPerInch( ticksPerInch )
 {
     _pName = "LED 'Motor'";
     // note that pNextSub is being overwritten here, but this should not be a problem as long as
@@ -73,11 +74,14 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
             Serial.println( _throttleRight );
         }
 
-        // simulate Position update0
-        _pPosition->_currentEncoderPositionLeft += _throttleLeft * _leftRatio;
-        _pPosition->_currentEncoderPositionRight += _throttleRight * _rightRatio;
+        // simulate Position update.  Assume full throttle yields 10 IPS, scale to produce encoder ticks per step
+        // apply differential ratios to simulate motor/gear/wheel differences in throttle response.
+        float maxTicksPerStep = _ticksPerInch * 10.0 * ( (float) pControlParams->GetInterval() / 1000.0 );
+        _pPosition->_currentEncoderPositionLeft += map( _throttleLeft, 0, 255, 0, maxTicksPerStep ) * _leftRatio;
+        _pPosition->_currentEncoderPositionRight += map( _throttleRight, 0, 255, 0, maxTicksPerStep )  * _rightRatio;
 
         if ( _messageMask & MM_PROGRESS ) {
+            PRINT_VAR( maxTicksPerStep );
             Serial.print( F( "Positions set to: " ) );
             Serial.print( _pPosition->_currentEncoderPositionLeft );
             Serial.print( '/' );
@@ -125,7 +129,7 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
                     Serial.println( _rightRatio );
                 }
             break;
-        case 'L' : // set throttle/speed differential
+        case 'L' : // set throttle limit
             _throttleChangeLimit = pData->nParams[0];\
             break;
     }
