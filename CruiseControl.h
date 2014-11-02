@@ -46,25 +46,19 @@ Subsumption Architecture as described by David P. Anderson.
 
 class CruiseControl : public Actor
 {
-    uint32_t    _idealPositionLeft;
-    uint32_t    _idealPositionRight;
+    float       _idealPositionLeft;
+    float       _idealPositionRight;
 
-    uint32_t    _prevPositionLeft;
-    uint32_t    _prevPositionRight;
+    float       _prevPositionLeft;
+    float       _prevPositionRight;
 
-    int         _prevErrorLeft;
-    int         _prevErrorRight;
+    float       _prevErrorLeft;
+    float       _prevErrorRight;
 
     int         _throttleLeft;
     int         _throttleRight;
 
-    //int         _lastErrorLeft;
-    //int         _lastErrorRight;
-
     float       _targetSpeedIPS;
-    float       _targetSpeedTicksPerSecond;
-
-    float       _EncoderTicksPerInch;
 
     bool        _bCruising;
 
@@ -74,13 +68,12 @@ class CruiseControl : public Actor
     float       _kI;
     float       _kD;
 
-
 public:
-    CruiseControl( CommandDispatcher* pCD, Position* pOD, float ticksPerRev, float wheelDiameter );
+    CruiseControl( CommandDispatcher* pCD, Position* pOD );
 
-    virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
+    virtual void    handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
+    virtual void    handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
-    virtual void        PrintHelp();
-    virtual void        PrintSpecificParameterValues();
+    virtual void    PrintHelp();
+    virtual void    PrintSpecificParameterValues();
 };

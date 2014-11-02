@@ -83,7 +83,7 @@ Navigator           navigator( &dispatcher, &position, &waypointManager );
 CollisionRecovery   bumper( &dispatcher, 0, 0 );
 
 // CruiseControl maintains the current heading and speed
-CruiseControl       cruise( &dispatcher, &position, TicksPerInch( ENCODER_TICKS_PER_REVOLUTION, WHEEL_DIAMETER ), WHEEL_SPACING );
+CruiseControl       cruise( &dispatcher, &position );
 
 void setup()
 {
