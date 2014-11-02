@@ -100,6 +100,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                     headingError = fmod( headingError + piOffset, 2.0 * PI ) - piOffset;
 //                    headingError = atan( tan( headingError ) );
                     IF_MSG( MM_CALC ) {
+                        Serial.print( F("Adjusted ") );
                         PRINT_VAR( headingError );
                     }
 
