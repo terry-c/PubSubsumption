@@ -37,7 +37,7 @@ public:
 class CommandDispatcher : public Publisher
 {
 
-    uint8_t bufIx;
+    uint8_t     _bufIx;
 
     // the subscriber array contains pointers to the Subscribers which have requested notifications of command
     // events.  This array is indexed by the commands themselves, with the first element corresponding to 'A'.
@@ -47,18 +47,19 @@ class CommandDispatcher : public Publisher
     //
     // If the element is NULL, it means there is no subscriber for that command letter, so an error message is
     // sent to the console.
-    Subscriber* subscribers[26];
+    Subscriber* _subscribers[26];
 
     // this is the event notification object which is passed to Subscribers
     CommandArgs _args;
 
-    enum eDispatchAction { eNotify, eHelpSummary, eHelpDetail };
+    bool        _bMenuMode;
+    char        _menuModeCmdChar;
+
+    enum        eDispatchAction { eNotify, eHelpSummary, eHelpDetail };
 
     Subscriber* dispatchCommand( char cmdChar, eDispatchAction eAction );
     void        processCommandLine( void );
-
-    bool        _bMenuMode;
-    char        _menuModeCmdChar;
+    void        displayTopLevelMenu( void );
 
 public:
 
