@@ -38,6 +38,8 @@ class MotorDriver : public Actor
 
     Position*       _pPosition;
 
+    int             _throttleChangeLimit;
+
     int             _throttleLeft;
     int             _throttleRight;
 

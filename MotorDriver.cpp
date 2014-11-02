@@ -32,6 +32,7 @@ MotorDriver::MotorDriver(
                                                 _pPosition( pOD )
 {
     _pName = "Motor";
+    _throttleChangeLimit = 64;  // prevent throttle from changing more than this in each step
 
     SubscribeTo( pCD, 'M' );    // All our commands begin with "L"
     
@@ -50,12 +51,13 @@ void MotorDriver::handleControlEvent( EventNotification* pEvent, ControlParams* 
 {
     if ( _bEnabled ) {
         ControlParams* pControlParams = (ControlParams*) pEvent->pData;
-        _throttleLeft = pControlParams->GetLeftThrottle();
-        _throttleRight = pControlParams->GetRightThrottle();
+
+        // don't allow rapid throttle changes
+        _throttleLeft = constrain( pControlParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
+        _throttleRight = constrain( pControlParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
 
         bool bReverseLeft = _throttleLeft < 0;
         bool bReverseRight = _throttleRight < 0;
-
 
         analogWrite( _pwmPinLF, constrain( abs(_throttleLeft), 0, 255 ) );
         analogWrite( _pwmPinLR, constrain( abs(_throttleLeft), 0, 255 ) );
@@ -104,6 +106,15 @@ void MotorDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pA
                     Serial.print( leftSpeed ); Serial.print( '\t' );
                     Serial.println( rightSpeed );
                 }
+            }
+            break;
+
+        case 'L' : // set throttle limit
+            _throttleChangeLimit = pData->nParams[0];
+
+            IF_MSG( MM_RESPONSES ) {
+                Serial.print( F( "Motor throttle change limit set to " ) );
+                Serial.println( _throttleChangeLimit );
             }
             break;
     }
