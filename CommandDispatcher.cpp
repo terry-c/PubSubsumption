@@ -20,9 +20,9 @@ CommandDispatcher::CommandDispatcher()
 
     memset(_args.nParams, 0, sizeof(_args.nParams) );
     memset(_args.fParams, 0, sizeof(_args.fParams) );
-    memset(subscribers, 0, sizeof(subscribers) );
+    memset(_subscribers, 0, sizeof(_subscribers) );
     memset( _args.inputBuffer, 0, sizeof( _args.inputBuffer ) );
-    bufIx = 0;
+    _bufIx = 0;
 }
 
 CommandDispatcher::~CommandDispatcher() {}
@@ -54,34 +54,41 @@ void CommandDispatcher::Update()
             // if we're in "menu mode", prepend the menu command character
             if ( _menuModeCmdChar != 0 ) {
                 _args.inputBuffer[0] = _menuModeCmdChar;
-                bufIx = 1;
+                _bufIx = 1;
             }
             else {
-                bufIx = 0;
+                _bufIx = 0;
             }
         }
         else {
-            if ( bufIx >= 32 ) {
+            if ( _bufIx >= 32 ) {
                 // buffer overflow
             }
             else {
-                _args.inputBuffer[ bufIx++ ] = ch;
+                _args.inputBuffer[ _bufIx++ ] = ch;
             }
         }
     }
 }
 
+
+void CommandDispatcher::displayTopLevelMenu( void )
+{
+    Serial.println(F("\n=================="
+                     "\nAvailable Objects:\n"));
+    for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
+        dispatchCommand( cmd, eHelpSummary );
+    }
+    Serial.println();
+}
+
+
 void CommandDispatcher::processCommandLine( void )
 {
     int cmdLen = strlen( _args.inputBuffer );
-    if ( cmdLen == 0 || (_menuModeCmdChar > 0 && cmdLen == 1) ) {
+    if ( (cmdLen == 0) || (_menuModeCmdChar > 0 && cmdLen == 1) ) {
         _menuModeCmdChar = 0;
-        // display top-level menu
-        Serial.println(F("\n=================="
-                         "\nAvailable Objects:\n"));
-        for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
-            dispatchCommand( cmd, eHelpSummary );
-        }
+        displayTopLevelMenu();
     }
     else {
         // process command completion
@@ -110,10 +117,7 @@ void CommandDispatcher::processCommandLine( void )
         case '?' :
             // if just a ?, or invalid command, list commands
             if ( ( strlen( _args.inputBuffer ) == 1 ) || dispatchCommand( _args.inputBuffer[1], eHelpDetail ) == NULL ) {
-                Serial.println(F("\nAvailable Objects:"));
-                for ( char cmd = 'A'; cmd <= 'Z'; cmd++ ) {
-                    dispatchCommand( cmd, eHelpSummary );
-                }
+                displayTopLevelMenu();
             }
             break;
         case '*' : // broadcast
@@ -146,8 +150,8 @@ Subscriber* CommandDispatcher::Subscribe( Subscriber* pSub, uint8_t eventID )
         // consider returning failure code somehow, or not.
     }
     else {
-        pCurrentSubscriber = subscribers[ eventID - 'A' ];
-        subscribers[ eventID - 'A' ] = pSub;
+        pCurrentSubscriber = _subscribers[ eventID - 'A' ];
+        _subscribers[ eventID - 'A' ] = pSub;
     }
     return pCurrentSubscriber;
 }
@@ -174,7 +178,7 @@ Subscriber* CommandDispatcher::dispatchCommand( char cmdChar, eDispatchAction eA
         Serial.println(F("Invalid command"));
     }
     else {
-        pSubscriber = subscribers[ cmdIx ];
+        pSubscriber = _subscribers[ cmdIx ];
     }
 
     // if there's a subscriber for this event, send the notification
