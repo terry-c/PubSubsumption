@@ -56,6 +56,8 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
 {
     if ( _bEnabled ) {
         ControlParams* pControlParams = (ControlParams*) pEvent->pData;
+
+        // don't allow rapid throttle changes
         _throttleLeft = constrain( pControlParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
         _throttleRight = constrain( pControlParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
 
@@ -113,24 +115,33 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
                 analogWrite( ledPinRF, rightSpeed < 0 ? 0 : rightSpeed );
                 analogWrite( ledPinLB, leftSpeed < 0 ? -leftSpeed : 0 );
                 analogWrite( ledPinRB, rightSpeed < 0 ? -rightSpeed : 0 );
-                if ( _messageMask & MM_RESPONSES ) {
+
+                IF_MSG( MM_RESPONSES ) {
                     Serial.print( F( "LED simulator speeds directly set to: " ) );
                     Serial.print( leftSpeed ); Serial.print( '\t' );
                     Serial.println( rightSpeed );
                 }
             }
             break;
+
         case 'D' : // set throttle/speed differential
             _leftRatio = pData->fParams[0];
             _rightRatio = pData->fParams[1];
-                if ( _messageMask & MM_RESPONSES ) {
-                    Serial.print( F( "LED simulator throttle/speed ratios set to: " ) );
-                    Serial.print( _leftRatio ); Serial.print( '\t' );
-                    Serial.println( _rightRatio );
-                }
+
+            IF_MSG( MM_RESPONSES ) {
+                Serial.print( F( "LED simulator throttle/speed ratios set to: " ) );
+                Serial.print( _leftRatio ); Serial.print( '\t' );
+                Serial.println( _rightRatio );
+            }
             break;
+
         case 'L' : // set throttle limit
-            _throttleChangeLimit = pData->nParams[0];\
+            _throttleChangeLimit = pData->nParams[0];
+
+            IF_MSG( MM_RESPONSES ) {
+                Serial.print( F( "LED throttle change limit set to " ) );
+                Serial.println( _throttleChangeLimit );
+            }
             break;
     }
 }
