@@ -28,7 +28,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 class LEDDriver : public Actor
 {
-    uint8_t         ledPinLF, ledPinRF, ledPinLB, ledPinRB;
+    uint8_t         _ledPwmPinLeft, _ledPwmPinRight, _ledDirPinLeft, _ledDirPinRight;
 
     Position*       _pPosition;
     float           _ticksPerInch;
@@ -41,9 +41,12 @@ class LEDDriver : public Actor
 
     int             _throttleChangeLimit;
 
+    void            SetLED( int speed, int pwmPin, int dirPin );
+
+
 public:
 
-    LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin, CommandDispatcher* pCD, Position* pOD, float ticksPerInch );
+    LEDDriver( uint8_t pwmPinLeft, uint8_t pwmPinRight, uint8_t dirPinLeft, uint8_t dirPinRight, CommandDispatcher* pCD, Position* pOD, float ticksPerInch );
     void                Update( void );
 //    virtual Subscriber* HandleEvent(EventNotification* pEvent);
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );

@@ -71,7 +71,7 @@ Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pE
 // LEDDriver is the last Behavior, consuming any adjustments made by higher-priority behaviors.
 // LEDDriver is a motor simulator
 #ifdef USE_LED_EMULATOR
-LEDDriver           led( 9, 6, 10, 5, &dispatcher, &position, TicksPerInch( ENCODER_TICKS_PER_REVOLUTION, WHEEL_DIAMETER ) );
+LEDDriver           led( 10, 9, 14, 5, &dispatcher, &position, TicksPerInch( ENCODER_TICKS_PER_REVOLUTION, WHEEL_DIAMETER ) );
 #else
 MotorDriver         motor( 2, 3, 4, 5, 8, 9, 10, 11, &dispatcher, &position );
 #endif

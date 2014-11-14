@@ -12,12 +12,12 @@ Subsumption Architecture as described by David P. Anderson.
 
 // LED motor emulator
 
-LEDDriver::LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin, CommandDispatcher* pCD, Position* pOD, float ticksPerInch ) : 
+LEDDriver::LEDDriver( uint8_t pwmPinLeft, uint8_t pwmPinRight, uint8_t dirPinLeft, uint8_t dirPinRight, CommandDispatcher* pCD, Position* pOD, float ticksPerInch ) : 
     Actor( pCD ),
-    ledPinLF(lfpin), 
-    ledPinRF(rfpin), 
-    ledPinLB(lbpin), 
-    ledPinRB(rbpin),
+    _ledPwmPinLeft(pwmPinLeft), 
+    _ledPwmPinRight(pwmPinRight), 
+    _ledDirPinLeft(dirPinLeft), 
+    _ledDirPinRight(dirPinRight),
     _pPosition( pOD ),
     _ticksPerInch( ticksPerInch )
 {
@@ -33,10 +33,10 @@ LEDDriver::LEDDriver( uint8_t lfpin, uint8_t rfpin, uint8_t lbpin, uint8_t rbpin
 
     _throttleChangeLimit = 64;  // prevent throttle from changing more than this in each step
 
-    pinMode( ledPinLF, OUTPUT );
-    pinMode( ledPinRF, OUTPUT );
-    pinMode( ledPinLB, OUTPUT );
-    pinMode( ledPinRB, OUTPUT );
+    pinMode( _ledPwmPinLeft, OUTPUT );
+    pinMode( _ledPwmPinRight, OUTPUT );
+    pinMode( _ledDirPinLeft, OUTPUT );
+    pinMode( _ledDirPinRight, OUTPUT );
 }
 
 void LEDDriver::Update( void ) {
@@ -61,12 +61,10 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
         _throttleLeft = constrain( pControlParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
         _throttleRight = constrain( pControlParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
 
-        analogWrite( ledPinLF, _throttleLeft < 0 ? 0 : constrain( _throttleLeft, 0, 255 ) );
-        analogWrite( ledPinRF, _throttleRight < 0 ? 0 : constrain( _throttleRight, 0, 255 ) );
-        analogWrite( ledPinLB, _throttleLeft < 0 ? constrain( -_throttleLeft, 0, 255 ) : 0 );
-        analogWrite( ledPinRB, _throttleRight < 0 ? constrain( -_throttleRight, 0, 255 ) : 0 );
+        SetLED( _throttleLeft, _ledPwmPinLeft, _ledDirPinLeft );
+        SetLED( _throttleRight, _ledPwmPinRight, _ledDirPinRight );
 
-        // display name of subsuming Actor
+        // display name of subsuming Actor, and requested throttle settings
         if ( _messageMask & MM_INFO && pControlParams->ActorInControl() ) {
             Serial.print( '[' );
             Serial.print( pControlParams->ActorInControl()->GetName() );
@@ -111,10 +109,8 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
                 int leftSpeed = pData->nParams[0];
                 int rightSpeed = pData->nParams[1];
 
-                analogWrite( ledPinLF, leftSpeed < 0 ? 0 : leftSpeed );
-                analogWrite( ledPinRF, rightSpeed < 0 ? 0 : rightSpeed );
-                analogWrite( ledPinLB, leftSpeed < 0 ? -leftSpeed : 0 );
-                analogWrite( ledPinRB, rightSpeed < 0 ? -rightSpeed : 0 );
+                SetLED( leftSpeed, _ledPwmPinLeft, _ledDirPinLeft );
+                SetLED( rightSpeed, _ledPwmPinRight, _ledDirPinRight );
 
                 IF_MSG( MM_RESPONSES ) {
                     Serial.print( F( "LED simulator speeds directly set to: " ) );
@@ -156,3 +152,18 @@ void LEDDriver::PrintHelp()
                         ) );
 }
 
+
+// The LED's are bipolar red/green, connected so that driving with one polarity produces green
+// and reversing the polarity produces red.  One side of the LED pair is connected to a digital
+// pin which is set high for forward and low for reverse.  The other side is connected to a
+// PWM output for dimming to reflect speed.  When the direction pin is high, PWM is inverted
+// to maintain the correct brightness/speed relationship.
+
+void LEDDriver::SetLED( int speed, int pwmPin, int dirPin )
+{
+    bool bFwd  = speed >= 0;
+    int throttle  = constrain( speed, -255, 255 );
+        
+    analogWrite( pwmPin,  bFwd  ? throttle  : 255 + throttle ); // slightly non-obvious: !bFwd means throttle is negative
+    digitalWrite( dirPin,  !bFwd  );
+}
