@@ -8,7 +8,6 @@ Written by Terry Crook in collaboration with Clayton Dean, and based upon the
 Subsumption Architecture as described by David P. Anderson.
 */
 
-//#include <Arduino.h>
 #include "CommandDispatcher.h"
 
 CommandDispatcher::CommandDispatcher() 
