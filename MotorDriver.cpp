@@ -34,7 +34,7 @@ MotorDriver::MotorDriver(
     _pName = "Motor";
     _throttleChangeLimit = 64;  // prevent throttle from changing more than this in each step
 
-    SubscribeTo( pCD, 'M' );    // All our commands begin with "L"
+    SubscribeTo( pCD, 'M' );    // All our commands begin with "M"
     
     pinMode( _pwmPinLF, OUTPUT );
     pinMode( _pwmPinRF, OUTPUT );
@@ -124,6 +124,7 @@ void MotorDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pA
 void MotorDriver::PrintHelp() 
 {
     Actor::PrintHelp();
-    Serial.println( F( "  S <LeftSpeed> <RightSpeed>: Set 'Motor' speeds" ) );
+    Serial.println( F( "  S <LeftSpeed> <RightSpeed>: Set 'Motor' speeds\n"
+                       "  L <Limit>: Set throttle change limit" ) );
 }
 
