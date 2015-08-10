@@ -17,7 +17,11 @@ Position::Position( CommandDispatcher* pCD, Director* pD,
     leftPosition = &_currentEncoderPositionLeft;
     rightPosition = &_currentEncoderPositionRight;
 
-    _pName = "Position";
+    _pName = F("Position");
+    _bCanBeDisabled = false;
+    _pHelpString = F(  "  V <level> : Set verbosity level\n" 
+                        "  R 9 : Reset position to zero" 
+                        );
 
     SubscribeTo( pCD, 'P' );
 
@@ -50,12 +54,17 @@ void Position::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
 void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
     // first, we compute our current position (x, y, theta)
-    _leftInches      = _currentEncoderPositionLeft / _EncoderTicksPerInch;
-    _rightInches     = _currentEncoderPositionRight / _EncoderTicksPerInch;
-    _distanceInches  = (_leftInches + _rightInches) / 2.0;
+    float dLeftInches = _currentEncoderPositionLeft / _EncoderTicksPerInch - _leftInches;
+    float dRightInches = _currentEncoderPositionRight / _EncoderTicksPerInch - _rightInches;
+    float dDistanceInches = (dLeftInches + dRightInches) / 2.0;
+
+    _leftInches      += dLeftInches;
+    _rightInches     += dRightInches;
+    _distanceInches  += dDistanceInches;
+
     _theta           = (_leftInches - _rightInches) / _WheelSpacingInches;
-    _xInches         = _distanceInches * sin( _theta );
-    _yInches         = _distanceInches * cos( _theta );
+    _xInches         += dDistanceInches * sin( _theta );
+    _yInches         += dDistanceInches * cos( _theta );
     _headingDegrees  = _theta * (180.0 / PI);
 
     IF_MSG( MM_PROGRESS ) {
@@ -79,16 +88,4 @@ void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pCo
         CSV_OUT( _yInches        );
         CSV_OUT( _headingDegrees );
     }
-}
-
-
-void Position::PrintHelp() 
-{
-    // we don't handle any of the common Actor commands (0,1, etc.)
-    Serial.print( F( "\n========\nPosition verbosity = 0x" ) );
-    Serial.println( _messageMask, HEX );
-    Serial.println( F( "\n- - -\n\nPosition Options:\n" ) );
-    Serial.println( F(  "  V <level> : Set verbosity level\n" 
-                        "  R 9 : Reset position to zero" 
-                        ) );
 }
