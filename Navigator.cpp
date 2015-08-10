@@ -15,7 +15,10 @@ Navigator::Navigator( CommandDispatcher* pCD, Position* pOd, WaypointManager* pW
     _pPosition = pOd;
     _pWaypointManager = pWM;
 
-    _pName = "Navigator";
+    _pName = F("Navigator");
+    _pHelpString = F(  "  T <degrees> : set heading tolerance\n"
+                        "  R : restart at first waypoint" 
+                        );
 
     // we need to subscribe to events from the two Publishers
     SubscribeTo( pCD, 'N' );
@@ -71,8 +74,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                             Serial.println( F( "\nWe have arrived!\n" ) );
                         }
 
-                        pControlParams->SetThrottles( 0, 0 );
-                        pControlParams->ControlledBy( this );
+                        pControlParams->SetThrottles( 0, 0, this);
                         _waypointNumber = 0;
                     }
 
@@ -97,7 +99,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                     }
                     // normalize the error value
                     float piOffset = headingError < 0.0 ? -PI : PI;
-                    headingError = fmod( headingError + piOffset, 2.0 * PI ) - piOffset;
+                    headingError = fmod( headingError + piOffset, 2.0 * PI ) - PI;
 //                    headingError = atan( tan( headingError ) );
                     IF_MSG( MM_CALC ) {
                         Serial.print( F("Adjusted ") );
@@ -123,19 +125,18 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                         if ( headingError < 0 ) {
                             // map error (0..3) to throttle ( rightsnapshot .. -leftsnapshot )
                             int rightThrottle = fmap( -headingError, 0.0, 3.14, _rightThrottleSnapshot, -_leftThrottleSnapshot );
-                            pControlParams->SetThrottles( _leftThrottleSnapshot, rightThrottle  );
+                            pControlParams->SetThrottles( _leftThrottleSnapshot, rightThrottle , this);
                             IF_MSG( MM_CALC ) {
                                 PRINT_VAR( rightThrottle );
                             }
                         }
                         else {
                             int leftThrottle = fmap( headingError, 0.0, 3.14, _leftThrottleSnapshot, -_rightThrottleSnapshot );
-                            pControlParams->SetThrottles( leftThrottle, _rightThrottleSnapshot );
+                            pControlParams->SetThrottles( leftThrottle, _rightThrottleSnapshot, this);
                             IF_MSG( MM_CALC ) {
                                 PRINT_VAR( leftThrottle );
                             }
                         }
-                        pControlParams->ControlledBy( this );
                     }
                     else {
                         // on course
@@ -149,8 +150,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                 IF_MSG( MM_PROGRESS ) {
                     Serial.println( F( "Destination reached." ) );
                 }
-                pControlParams->SetThrottles( 0, 0 );
-                pControlParams->ControlledBy( this );
+                pControlParams->SetThrottles( 0, 0, this);
                 _waypointNumber = 0;
             }
         }
@@ -210,12 +210,12 @@ void Navigator::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
     }
 }
 
-
-void Navigator::PrintHelp() 
+void Navigator::PrintSpecificParameterValues()
 {
-    Actor::PrintHelp();
-    Serial.println( F(  "  T <degrees> : set heading tolerance\n"
-                        "  R : restart at first waypoint" 
-                        ) );
-}
+    Serial.print( F( " Current Waypoint: " ) );
+    Serial.println( _waypointNumber );
 
+    Serial.print( F( " Heading tolerance: " ) );
+    Serial.println( _headingTolerance );
+
+}
