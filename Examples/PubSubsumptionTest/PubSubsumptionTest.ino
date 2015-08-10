@@ -63,6 +63,7 @@ Director            director( &dispatcher, 1000 );    // 1000 ms interval
 
 // other entities
 WaypointManager     waypointManager( &dispatcher );
+
 Position            position( &dispatcher, &director, _pEncoderPositionLeft, _pEncoderPositionRight, TicksPerInch( ENCODER_TICKS_PER_REVOLUTION, WHEEL_DIAMETER ), WHEEL_SPACING );     // this carries the current positions of all motors.
 
 // Actors.  These are objects which participate in the Subsumption chain.
@@ -87,7 +88,14 @@ CruiseControl       cruise( &dispatcher, &position );
 
 void setup()
 {
-    Serial.begin(115200);
+    waypointManager.AppendWaypoint( 0, 24, 2 );
+    waypointManager.AppendWaypoint( 24, 24, 2 );
+    waypointManager.AppendWaypoint( 24, 0, 2 );
+    waypointManager.AppendWaypoint( 0, 0, 2 );
+
+    cruise.SetCruiseSpeed( 1.0 );
+
+    Serial.begin(38400);
 
 #ifndef USE_LED_EMULATOR
     pinMode( _pinLeftEncoderA , INPUT );

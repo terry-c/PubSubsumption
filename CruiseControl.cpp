@@ -18,7 +18,11 @@ CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD ) : Actor( p
     _kI = 0.5;
     _kD = 0.0;
 
-    _pName = "Cruise Control";
+    _pName = F("Cruise Control");
+    _pHelpString =  F(  "  S <Speed> : Set cruising speed (IPS)\n"
+                        "  P <kP> <kI> <kD> : Set PID coefficients" 
+                        );
+
     _bCruising = false;
 
     SubscribeTo( pCD, 'C' );    // All our commands begin with "C"
@@ -38,8 +42,6 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
             _bCruising = false;
         }
         else {  // nobody else cares, so it's our turn
-            pControlParams->ControlledBy( this );
-
             float targetSpeedInchesPerInterval = ( _targetSpeedIPS * pControlParams->GetInterval() ) / 1000;
 
             if ( _bCruising ) {    // this means we were already cruising
@@ -78,6 +80,22 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
                     PRINT_VAR( _kI * cumulativeErrorLeft );
                 }
 
+                IF_CSV( MM_CSVBASIC ) {
+                    CSV_OUT( targetSpeedInchesPerInterval );                      
+                    CSV_OUT( _idealPositionLeft );                     
+                    CSV_OUT( _prevPositionLeft );                      
+                    CSV_OUT( deltaLeft );                              
+                    CSV_OUT( errorInchesLeft );                              
+                    CSV_OUT( cumulativeErrorLeft );                    
+                    CSV_OUT( _kI * cumulativeErrorLeft );              
+                    CSV_OUT( _idealPositionRight );                     
+                    CSV_OUT( _prevPositionRight );                      
+                    CSV_OUT( deltaRight );                              
+                    CSV_OUT( errorInchesRight );                              
+                    CSV_OUT( cumulativeErrorRight );                    
+                    CSV_OUT( _kI * cumulativeErrorRight );              
+                }
+
                 // Upate some numbers for the next time
                 _prevErrorLeft = errorInchesLeft;
                 _prevErrorRight = errorInchesRight;
@@ -98,24 +116,8 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
             _idealPositionRight += targetSpeedInchesPerInterval;
 
             // set the throttle positions.
-            pControlParams->SetThrottles( _throttleLeft, _throttleRight );
+            pControlParams->SetThrottles( _throttleLeft, _throttleRight, this );
         }
-    }
-
-    IF_CSV( MM_CSVBASIC ) {
-        CSV_OUT( targetSpeedInchesPerInterval );                      
-        CSV_OUT( _idealPositionLeft );                     
-        CSV_OUT( _prevPositionLeft );                      
-        CSV_OUT( deltaLeft );                              
-        CSV_OUT( errorInchesLeft );                              
-        CSV_OUT( cumulativeErrorLeft );                    
-        CSV_OUT( _kI * cumulativeErrorLeft );              
-        CSV_OUT( _idealPositionRight );                     
-        CSV_OUT( _prevPositionRight );                      
-        CSV_OUT( deltaRight );                              
-        CSV_OUT( errorInchesRight );                              
-        CSV_OUT( cumulativeErrorRight );                    
-        CSV_OUT( _kI * cumulativeErrorRight );              
     }
 }
 
@@ -149,16 +151,6 @@ void CruiseControl::handleCommandEvent( EventNotification* pEvent, CommandArgs* 
             }
             break;
         }
-}
-
-
-void CruiseControl::PrintHelp() 
-{
-    // we only handle one event, the "L" command:
-    Actor::PrintHelp();
-    Serial.println( F(  "  S <Speed> : Set cruising speed (IPS)\n"
-                        "  P <kP> <kI> <kD> : Set PID coefficients" 
-                        ) );
 }
 
 

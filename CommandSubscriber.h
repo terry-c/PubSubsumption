@@ -14,7 +14,6 @@ Subsumption Architecture as described by David P. Anderson.
 
 /// The CommandSubscriber class is a base class for any class which needs to receive CommandDispatcher events.
 ///
-/// CommandSubscriber extends Subscriber, adding a PrintHelp() method to facilitate usage notes
 class CommandSubscriber : public Subscriber
 {
     /// The single-character command associated with this CommandSubscriber
@@ -23,7 +22,4 @@ class CommandSubscriber : public Subscriber
 public:
 
     CommandSubscriber( CommandDispatcher* pCD );
-
-    /// Display usage notes for subcommands.
-    virtual void        PrintHelp() = 0;
 };

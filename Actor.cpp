@@ -11,7 +11,7 @@ Subsumption Architecture as described by David P. Anderson.
 #include "Actor.h"
 
 
-Actor::Actor( CommandDispatcher* pCD ) : CommandSubscriber( pCD ), _bEnabled( true ), _messageMask( 1 )
+Actor::Actor( CommandDispatcher* pCD ) : CommandSubscriber( pCD ), _bEnabled( true ), _bCanBeDisabled(true), _messageMask( 1 )
 {
 
 }
@@ -58,17 +58,21 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
                 PrintHelp();
                 break;
             case '0' : 
-                _bEnabled = false; 
-                IF_MSG( MM_RESPONSES ) {
-                    Serial.print( _pName );
-                    Serial.println( F( " disabled." ) );
+                if ( _bCanBeDisabled ) {
+                    _bEnabled = false; 
+                    IF_MSG( MM_RESPONSES ) {
+                        Serial.print( _pName );
+                        Serial.println( F( " disabled." ) );
+                    }
                 }
                 break;
             case '1' : 
-                _bEnabled = true; 
-                IF_MSG( MM_RESPONSES ) {
-                    Serial.print( _pName );
-                    Serial.println( F( " enabled." ) );
+                if ( _bCanBeDisabled ) {
+                    _bEnabled = true; 
+                    IF_MSG( MM_RESPONSES ) {
+                        Serial.print( _pName );
+                        Serial.println( F( " enabled." ) );
+                    }
                 }
                 break;
             case 'Q' :
@@ -105,10 +109,14 @@ void Actor::PrintHelp()
     Serial.println("\n- - -\n");
     Serial.print( _pName );
     Serial.println( " options:\n" );
-    Serial.println( F( "  0: Disable" ) );
-    Serial.println( F( "  1: Enable" ) );
+    if ( _bCanBeDisabled )
+    {
+        Serial.println( F( "  0: Disable" ) );
+        Serial.println( F( "  1: Enable" ) );
+    }
     Serial.println( F( "  Q: Query Parameter Values" ) );
     Serial.println( F( "  V[+|-] <mask> : Set verbosity mask, or add/remove bits" ) );
+    Serial.println( _pHelpString );
 }
 
 

@@ -106,11 +106,13 @@ void CommandDispatcher::processCommandLine( void )
                 argIx++;
             }
         }
-        else {   // single character switches to menu mode
-            pCh[1] = '?';   // set up for Actor's menu display
-            _bMenuMode = true;
-            _menuModeCmdChar = cmdChar;
-        }
+
+        // disabling menu mode, for now
+        //else {   // single character switches to menu mode
+        //    pCh[1] = '?';   // set up for Actor's menu display
+        //    _bMenuMode = true;
+        //    _menuModeCmdChar = cmdChar;
+        //}
 
         switch ( cmdChar ) {
         case '?' :
@@ -174,7 +176,8 @@ Subscriber* CommandDispatcher::dispatchCommand( char cmdChar, eDispatchAction eA
     int cmdIx = cmdChar - 'A';
     if ( cmdIx < 0 || cmdIx > 25 ) {
         // command out of range
-        Serial.println(F("Invalid command"));
+        Serial.print(F("Invalid command "));
+        Serial.println( cmdChar );
     }
     else {
         pSubscriber = _subscribers[ cmdIx ];

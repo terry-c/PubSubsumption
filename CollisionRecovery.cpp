@@ -13,7 +13,12 @@ Subsumption Architecture as described by David P. Anderson.
 
 CollisionRecovery::CollisionRecovery( CommandDispatcher* pCD, uint8_t leftPin, uint8_t rightPin ) : Actor( pCD )
 {
-    _pName = "Crash Recover";
+    _pName = F("Crash Recover");
+    _pHelpString = F(  "  L: Simulate bump left\n"
+                        "  R: Simulate bump right\n"
+                        "  S: <s1> <s2> <s3> <s4> Speeds (throttle) \n"
+                        "  T: <t1> <t2> <t3> <t4> Times (ticks)" 
+                        );
 
     // we need to subscribe to events from the two Publishers
     SubscribeTo( pCD, 'B' );
@@ -115,8 +120,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlPa
 
         }
         if ( bInControl ) {
-            pControlParams->ControlledBy( this );
-            pControlParams->SetThrottles( leftMotorSpeed, rightMotorSpeed );
+            pControlParams->SetThrottles( leftMotorSpeed, rightMotorSpeed, this );
         }
     }
 }
@@ -169,16 +173,6 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
             }
             break;
     }
-}
-
-void CollisionRecovery::PrintHelp() 
-{ 
-    Actor::PrintHelp();
-    Serial.println( F(  "  L: Simulate bump left\n"
-                        "  R: Simulate bump right\n"
-                        "  S: <s1> <s2> <s3> <s4> Speeds (throttle) \n"
-                        "  T: <t1> <t2> <t3> <t4> Times (ticks)" 
-                        ) ); 
 }
 
 

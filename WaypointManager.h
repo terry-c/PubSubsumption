@@ -57,6 +57,7 @@ public:
     ~WaypointManager();
 
     Waypoint*               GetWaypoint( uint16_t ixWaypoint )   { return ixWaypoint < _nextWaypoint ? &_waypoints[ ixWaypoint ] : NULL; }
+    void                    AppendWaypoint( int x, int y, int radius )       {                _waypoints[ _nextWaypoint++ ].Set( x, y, radius ); }
 
     virtual Subscriber*     HandleEvent( EventNotification* pEvent );
 

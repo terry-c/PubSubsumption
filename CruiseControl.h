@@ -71,9 +71,10 @@ class CruiseControl : public Actor
 public:
     CruiseControl( CommandDispatcher* pCD, Position* pOD );
 
+    void SetCruiseSpeed( float speedIPS )    { _targetSpeedIPS = speedIPS; }
+
     virtual void    handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
     virtual void    handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
-    virtual void    PrintHelp();
     virtual void    PrintSpecificParameterValues();
 };

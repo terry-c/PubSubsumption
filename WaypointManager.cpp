@@ -13,11 +13,15 @@ Subsumption Architecture as described by David P. Anderson.
 
 WaypointManager::WaypointManager( CommandDispatcher* pCD ) : CommandSubscriber( pCD )
 {
-    _pName = "Waypoints";
+    _pName = F("Waypoints");
 
     SubscribeTo( pCD, 'W' );  // WaypointManager commands, of course!
 
     _nextWaypoint = 0;
+    // set an initial "dummy" waypoint at the origin, so Navigator will have
+    // something to initialize to.  Yes, there's probably a better way.
+    _waypoints[ _nextWaypoint++ ].Set( 0, 0, 10 );
+
 }
 
 WaypointManager::~WaypointManager() 

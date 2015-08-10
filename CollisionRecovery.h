@@ -62,8 +62,5 @@ public:
     virtual void    handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
     virtual void    handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
 
-
-    virtual void    PrintHelp();
     virtual void    PrintSpecificParameterValues();
-
 };

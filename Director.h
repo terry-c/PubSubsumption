@@ -37,7 +37,7 @@ public:
     void        ControlledBy( Actor* pActor )           { _pTakenBy = pActor; }
     Actor*      ActorInControl()                        { return _pTakenBy; }
 
-    void        SetThrottles( int left, int right )     { _throttleLeft = left; _throttleRight = right; }
+    void        SetThrottles( int left, int right, Actor* pActor )     { _throttleLeft = left; _throttleRight = right; _pTakenBy = pActor; }
     void        SetLeftThrottle( int left )             { _throttleLeft = left; }
     void        SetRightThrottle( int right )           { _throttleRight = right; }
     int         GetLeftThrottle()                       { return _throttleLeft; }
@@ -80,10 +80,6 @@ public:
     /// it checks millis(), and returns if the interval has not elapsed.  When the interval has elapsed,
     /// it sends the subsumption event to the subscribers.
     void Update();
-
-    void PrintHelp();
-
-//    virtual Subscriber* HandleEvent( EventNotification* pEvent );
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
     virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams ) {}  // these would come from the Director

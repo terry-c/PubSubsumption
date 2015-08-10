@@ -31,6 +31,8 @@ Subsumption Architecture as described by David P. Anderson.
 /// snapshot, to minimize skew caused by sampling at different times.
 class Position : public Actor
 {
+    friend class LEDDriver;
+
     float   _EncoderTicksPerInch;
     float   _WheelSpacingInches;
 
@@ -42,12 +44,12 @@ public:
         uint32_t*& leftPosition, uint32_t*& rightPosition,  // pointers to _currentEncoderPositionLeft and _currentEncoderPositionRight
         float ticksPerInch, float wheelSpacing );
 
-    void PrintHelp();
-
+protected:
     /// these are the raw encoder positions, updated directly by the encoder interrupt handlers
     uint32_t    _currentEncoderPositionLeft;
     uint32_t    _currentEncoderPositionRight;
 
+public:
     /// encoder positions are captured here
     uint32_t    _snapshotPositionLeft;
     uint32_t    _snapshotPositionRight;

@@ -42,6 +42,11 @@ protected:
     /// Print common parameter values, such as verbosity, etc.  Then call PrintSpecificParameterValues()
     void            PrintParameterValues();
 
+    /// Help string to be defined by derived classes
+    const __FlashStringHelper*    _pHelpString;
+
+    bool            _bCanBeDisabled;
+
 public:
 
     Actor( CommandDispatcher* pCD );
@@ -51,9 +56,8 @@ public:
     // the default 0 eventID subscribes to the Director.
     virtual void        SubscribeTo( Publisher* pPub, uint8_t eventID = 0 );
 
-    // derived Actors should override PrintHelp() to provide specific help.
-    // they can call Actor::PrintHelp() to display the common commands (Help, Enable, Disable)
-    virtual void        PrintHelp();
+    // Print the help message defined by derived Actors 
+    void                PrintHelp();
 
     // derived Actors should override PrintSpecificParameterValues() to list their respective parameters
     virtual void        PrintSpecificParameterValues();

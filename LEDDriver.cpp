@@ -21,7 +21,7 @@ LEDDriver::LEDDriver( uint8_t pwmPinLeft, uint8_t pwmPinRight, uint8_t dirPinLef
     _pPosition( pOD ),
     _ticksPerInch( ticksPerInch )
 {
-    _pName = "LED 'Motor'";
+    _pName = F("LED 'Motor'");
     // note that pNextSub is being overwritten here, but this should not be a problem as long as
     // the next subscriber for each event is the same, which it should be here.
     // if necessary, these could be separate variables, and the appropriate pointer would need
@@ -37,6 +37,11 @@ LEDDriver::LEDDriver( uint8_t pwmPinLeft, uint8_t pwmPinRight, uint8_t dirPinLef
     pinMode( _ledPwmPinRight, OUTPUT );
     pinMode( _ledDirPinLeft, OUTPUT );
     pinMode( _ledDirPinRight, OUTPUT );
+
+    _pHelpString =  F(  "  D <LeftRatio> <RightRatio>: Set 'Motor' differential ratios\n"
+                        "  L <Limit>: Set throttle change limit\n"
+                        "  S <LeftSpeed> <RightSpeed>: Set 'Motor' speeds"
+                    );
 }
 
 void LEDDriver::Update( void ) {
@@ -83,6 +88,7 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
         if ( _messageMask & MM_PROGRESS ) {
             PRINT_VAR( maxTicksPerStep );
             Serial.print( F( "Positions set to: " ) );
+
             Serial.print( _pPosition->_currentEncoderPositionLeft );
             Serial.print( '/' );
             Serial.println( _pPosition->_currentEncoderPositionRight );
@@ -140,16 +146,6 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
             }
             break;
     }
-}
-
-
-void LEDDriver::PrintHelp() 
-{
-    Actor::PrintHelp();
-    Serial.println( F(  "  D <LeftRatio> <RightRatio>: Set 'Motor' differential ratios\n"
-                        "  L <Limit>: Set throttle change limit\n"
-                        "  S <LeftSpeed> <RightSpeed>: Set 'Motor' speeds"
-                        ) );
 }
 
 

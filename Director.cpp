@@ -12,7 +12,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _pCD( pCD ), /*_intervalMS( interval ),*/ _bEnabled( true ), _bInhibit( true )
 {
-    _pName = "Director";
+    _pName = F("Director");
 
     // we'll turn on the LED during execution of the subsumption chain
     // to give some idea of how much time it takes
@@ -23,6 +23,12 @@ Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _
     _notification.pData = &_controlParams;
 
     SubscribeTo( pCD, 'D' );
+
+    _pHelpString =  F(  "  I <ms>: set interval ms\n"
+                        "  G : Go\n"
+                        "  L : Start CSV Logging\n"
+                        "  S : stop"
+                    );
 }
 
 
@@ -31,7 +37,7 @@ Director::~Director(void)
 }
 
 
-// Update() gets called from setup() as frequently as possible.  At
+// Update() gets called from loop() as frequently as possible.  At
 // intervals specified by _intervalMS, it initiates a Subsumption control event
 // and publishes it to all the Actors.
 void Director::Update()
@@ -42,8 +48,7 @@ void Director::Update()
         _tickTimeMS += _controlParams.GetInterval();
 
         if ( _bInhibit ) {
-            _controlParams.SetThrottles( 0, 0 );
-            _controlParams.ControlledBy( this );
+            _controlParams.SetThrottles( 0, 0, this );
         }
         else {
             // not inhibiting, let someone else have a chance for a change
@@ -71,17 +76,6 @@ void Director::Update()
 
         digitalWrite( 13, LOW );
     }
-}
-
-
-void Director::PrintHelp() 
-{
-    Actor::PrintHelp();
-    Serial.println( F(  "  I <ms>: set interval ms\n"
-                        "  G : Go\n"
-                        "  L : Start CSV Logging\n"
-                        "  S : stop"
-                        ) );
 }
 
 

@@ -73,7 +73,7 @@ class Subscriber
 {
 protected:
     Subscriber* _pNextSub;   // pointer to the next subscriber in the chain
-    char*       _pName;
+    const __FlashStringHelper*       _pName;
 
 public:
     // some subscribers may need a custom version of this.  For example, if
@@ -81,9 +81,9 @@ public:
     // a "next subscriber" pointer for each publisher.
     virtual void SubscribeTo( Publisher* pPub, uint8_t eventID );
 
-    Subscriber(void) { _pNextSub = NULL; _pName = "<Unnamed Subscriber>"; }
+    Subscriber(void) { _pNextSub = NULL; _pName = F("<Unnamed Subscriber>"); }
 
     virtual Subscriber* HandleEvent( EventNotification* pEvent ) = 0;
 
-    const char* GetName( void ) { return _pName; }
+    const __FlashStringHelper* GetName( void ) { return _pName; }
 };
