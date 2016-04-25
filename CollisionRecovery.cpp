@@ -11,7 +11,7 @@ Subsumption Architecture as described by David P. Anderson.
 #include <CollisionRecovery.h>
 #include <Director.h>
 
-CollisionRecovery::CollisionRecovery( CommandDispatcher* pCD, uint8_t leftPin, uint8_t rightPin ) : Actor( pCD )
+CollisionRecovery::CollisionRecovery( CommandDispatcher* pCD, uint8_t leftPin, uint8_t rightPin ) : Behavior( pCD )
 {
     _pName = F("Crash Recover");
     _pHelpString = F(  "  L: Simulate bump left\n"
@@ -45,7 +45,7 @@ CollisionRecovery::CollisionRecovery( CommandDispatcher* pCD, uint8_t leftPin, u
 
 void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
 {
-    if ( ! pControlParams->ActorInControl() ) {
+    if ( ! pControlParams->BehaviorInControl() ) {
         bool bInControl = true;
         int leftMotorSpeed = 0;
         int rightMotorSpeed = 0;

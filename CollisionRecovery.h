@@ -27,7 +27,7 @@ Subsumption Architecture as described by David P. Anderson.
 //
 // Each state has an associated duration and speed, which can be configured from the console.
 
-class CollisionRecovery : public Actor
+class CollisionRecovery : public Behavior
 {
     enum eRecoveryState {
         eNormal,

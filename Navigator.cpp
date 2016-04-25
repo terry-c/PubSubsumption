@@ -10,7 +10,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include <Navigator.h>
 
-Navigator::Navigator( CommandDispatcher* pCD, Position* pOd, WaypointManager* pWM ) : Actor( pCD )
+Navigator::Navigator( CommandDispatcher* pCD, Position* pOd, WaypointManager* pWM ) : Behavior( pCD )
 {
     _pPosition = pOd;
     _pWaypointManager = pWM;
@@ -48,7 +48,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
 
         // now, if this event has not already been subsumed, we need to plot a course
         // from our current position to our current waypoint, if any.
-        if ( ! pControlParams->ActorInControl() ) {
+        if ( ! pControlParams->BehaviorInControl() ) {
             // adjust the motors' speeds as necessary to correct our heading
 
             headingToWaypoint = _pPosition->_theta;   // current heading in radians, in case we don't have a waypoint

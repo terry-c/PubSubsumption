@@ -44,7 +44,7 @@ Subsumption Architecture as described by David P. Anderson.
 // the errors will accumulate.  A D (Derivative) term could be computed, as well, if it proves useful.
 // The commands for setting the I and D coefficients are CI and CD.  All commands take a float argument.
 
-class CruiseControl : public Actor
+class CruiseControl : public Behavior
 {
     float       _idealPositionLeft;
     float       _idealPositionRight;

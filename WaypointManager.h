@@ -63,7 +63,7 @@ public:
 
     virtual void            PrintHelp();
 
-    // Since WaypointManager is not an Actor, we have to handle this ourselves.
+    // Since WaypointManager is not an Behavior, we have to handle this ourselves.
     void                    PrintParameterValues();
 
 };

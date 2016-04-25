@@ -11,13 +11,13 @@ Subsumption Architecture as described by David P. Anderson.
 #pragma once
 
 #include <CommandDispatcher.h>
-#include <Actor.h>
+#include <Behavior.h>
 
 // ControlParams contains the motor control values which are passed through the Subsumption stack
 // and end up controlling the motors
 class ControlParams 
 {
-    Actor*      _pTakenBy;  // pointer to the first subsumption layer which takes control
+    Behavior*      _pTakenBy;  // pointer to the first subsumption layer which takes control
 
     int         _throttleLeft;
     int         _throttleRight;
@@ -34,10 +34,10 @@ public:
 
     ControlParams() : _throttleLeft( 0 ), _throttleRight( 0 ), _csvState( eCsvIdle ), _csvDelimiter( '\t' ), _stepIntervalMillis( 1000 ) {};
 
-    void        ControlledBy( Actor* pActor )           { _pTakenBy = pActor; }
-    Actor*      ActorInControl()                        { return _pTakenBy; }
+    void        ControlledBy( Behavior* pBehavior )     { _pTakenBy = pBehavior; }
+    Behavior*   BehaviorInControl()                     { return _pTakenBy; }
 
-    void        SetThrottles( int left, int right, Actor* pActor )     { _throttleLeft = left; _throttleRight = right; _pTakenBy = pActor; }
+    void        SetThrottles( int left, int right, Behavior* pBehavior )     { _throttleLeft = left; _throttleRight = right; _pTakenBy = pBehavior; }
     void        SetLeftThrottle( int left )             { _throttleLeft = left; }
     void        SetRightThrottle( int right )           { _throttleRight = right; }
     int         GetLeftThrottle()                       { return _throttleLeft; }
@@ -56,7 +56,7 @@ public:
 };
 
 
-class Director : public Publisher, public Actor
+class Director : public Publisher, public Behavior
 {
     CommandDispatcher* _pCD;
 

@@ -105,7 +105,7 @@ SimSerial Serial;
 
 /// Message Mask bits
 /// Serial informational and diagnostic output is controlled by
-/// bitmapped variables in each class.  In Actors, this is controlled
+/// bitmapped variables in each class.  In Behaviors, this is controlled
 /// by the *V command.  For example, to enable all messages in the LED
 /// class, issue the command "LV 31"
 #define MM_RESPONSES    0x01

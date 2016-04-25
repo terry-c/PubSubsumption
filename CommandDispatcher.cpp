@@ -109,7 +109,7 @@ void CommandDispatcher::processCommandLine( void )
 
         // disabling menu mode, for now
         //else {   // single character switches to menu mode
-        //    pCh[1] = '?';   // set up for Actor's menu display
+        //    pCh[1] = '?';   // set up for Behavior's menu display
         //    _bMenuMode = true;
         //    _menuModeCmdChar = cmdChar;
         //}

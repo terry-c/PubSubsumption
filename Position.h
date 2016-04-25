@@ -24,12 +24,12 @@ Subsumption Architecture as described by David P. Anderson.
 /// One option would be to ignore the "extra" motors and just track one motor on each side.  Another option might be
 /// to average the motors' odemetry data.
 ///
-/// Position is an Actor, so it participates in the Subsumption chain.  It should be first in the chain, but it will
+/// Position is an Behavior, so it participates in the Subsumption chain.  It should be first in the chain, but it will
 /// never subsume.  Instead, it takes a snapshot of the encoder positions and performs all the calculations to determine
-/// location, orientation, speed, etc.  These values are made available to any subsequent Actor which needs this information.
+/// location, orientation, speed, etc.  These values are made available to any subsequent Behavior which needs this information.
 /// This way, all these calculations are performed in one place, at one time, using the position values captured in the
 /// snapshot, to minimize skew caused by sampling at different times.
-class Position : public Actor
+class Position : public Behavior
 {
     friend class LEDDriver;
 

@@ -10,7 +10,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include <CruiseControl.h>
 
-CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD ) : Actor( pCD ) 
+CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD ) : Behavior( pCD ) 
 {
     _pPosition = pOD;
 
@@ -38,7 +38,7 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
     if ( _bEnabled ) {
         ControlParams* pControlParams = (ControlParams*) pEvent->pData;
 
-        if ( NULL != pControlParams->ActorInControl() ) {
+        if ( NULL != pControlParams->BehaviorInControl() ) {
             _bCruising = false;
         }
         else {  // nobody else cares, so it's our turn

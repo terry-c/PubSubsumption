@@ -10,7 +10,7 @@ Subsumption Architecture as described by David P. Anderson.
 
 #include "Director.h"
 
-Director::Director( CommandDispatcher* pCD, uint16_t interval) : Actor( pCD ), _pCD( pCD ), /*_intervalMS( interval ),*/ _bEnabled( true ), _bInhibit( true )
+Director::Director( CommandDispatcher* pCD, uint16_t interval) : Behavior( pCD ), _pCD( pCD ), /*_intervalMS( interval ),*/ _bEnabled( true ), _bInhibit( true )
 {
     _pName = F("Director");
 
@@ -39,7 +39,7 @@ Director::~Director(void)
 
 // Update() gets called from loop() as frequently as possible.  At
 // intervals specified by _intervalMS, it initiates a Subsumption control event
-// and publishes it to all the Actors.
+// and publishes it to all the Behaviors.
 void Director::Update()
 {
     if ( millis() >= _tickTimeMS ) {
@@ -89,14 +89,14 @@ void Director::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
                 Serial.println( _controlParams.GetInterval() );
             }
             break;
-        case 'S' :  // Stop -- inhibit all Actors
+        case 'S' :  // Stop -- inhibit all Behaviors
             _bInhibit = true;
             _controlParams.StopCsvOutput();
             if ( _messageMask & MM_RESPONSES ) {
                 Serial.println( F( "Director Stopped" ) );
             }
             break;
-        case 'G' :  // Go -- allow Actors to act
+        case 'G' :  // Go -- allow Behaviors to behave
             _bInhibit = false;
             if ( _messageMask & MM_RESPONSES ) {
                 Serial.println( F( "\n==========================\nDirector Started" ) );

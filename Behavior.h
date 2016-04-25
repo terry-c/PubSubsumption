@@ -15,18 +15,18 @@ Subsumption Architecture as described by David P. Anderson.
 
 class ControlParams;
 
-/// The Actor class is the base class for all participants in the Subsumption chain.
+/// The Behavior class is the base class for all participants in the Subsumption chain.
 ///
 /// 
-class Actor : public CommandSubscriber
+class Behavior : public CommandSubscriber
 {
 protected:
 
-    /// _bEnabled. Enablement means different things to each Actor.  Some will ignore it altogether (Position), while
+    /// _bEnabled. Enablement means different things to each Behavior.  Some will ignore it altogether (Position), while
     /// others will still update some internal state but will not participate otherwise.
     bool            _bEnabled;
 
-    /// Verbosity. _messageMask controls what messages are emitted by various Actors.  This is at the discretion of each Actor, but general guidelines are:
+    /// Verbosity. _messageMask controls what messages are emitted by various Behaviors.  This is at the discretion of each Behavior, but general guidelines are:
     ///
     /// * 0 = no output
     /// * 1 = responses to commands
@@ -36,8 +36,8 @@ protected:
     /// default verbosity level is set to 1
     uint16_t         _messageMask;
 
-    /// _pNextActor. pointer to the next actor in the Subsumption chain.
-    Subscriber*     _pNextActor;
+    /// _pNextBehavior. pointer to the next behavior in the Subsumption chain.
+    Subscriber*     _pNextBehavior;
 
     /// Print common parameter values, such as verbosity, etc.  Then call PrintSpecificParameterValues()
     void            PrintParameterValues();
@@ -49,17 +49,17 @@ protected:
 
 public:
 
-    Actor( CommandDispatcher* pCD );
-    ~Actor(){}
+    Behavior( CommandDispatcher* pCD );
+    ~Behavior(){}
 
     // this handles the subscription contract for Dispatcher and Director events
     // the default 0 eventID subscribes to the Director.
     virtual void        SubscribeTo( Publisher* pPub, uint8_t eventID = 0 );
 
-    // Print the help message defined by derived Actors 
+    // Print the help message defined by derived Behaviors 
     void                PrintHelp();
 
-    // derived Actors should override PrintSpecificParameterValues() to list their respective parameters
+    // derived Behaviors should override PrintSpecificParameterValues() to list their respective parameters
     virtual void        PrintSpecificParameterValues();
 
     // Handle events coming from the Dispatcher or the Director.  we route these to

@@ -13,7 +13,7 @@ Subsumption Architecture as described by David P. Anderson.
 // LED motor emulator
 
 LEDDriver::LEDDriver( uint8_t pwmPinLeft, uint8_t pwmPinRight, uint8_t dirPinLeft, uint8_t dirPinRight, CommandDispatcher* pCD, Position* pOD, float ticksPerInch ) : 
-    Actor( pCD ),
+    Behavior( pCD ),
     _ledPwmPinLeft(pwmPinLeft), 
     _ledPwmPinRight(pwmPinRight), 
     _ledDirPinLeft(dirPinLeft), 
@@ -69,10 +69,10 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
         SetLED( _throttleLeft, _ledPwmPinLeft, _ledDirPinLeft );
         SetLED( _throttleRight, _ledPwmPinRight, _ledDirPinRight );
 
-        // display name of subsuming Actor, and requested throttle settings
-        if ( _messageMask & MM_INFO && pControlParams->ActorInControl() ) {
+        // display name of subsuming Behavior, and requested throttle settings
+        if ( _messageMask & MM_INFO && pControlParams->BehaviorInControl() ) {
             Serial.print( '[' );
-            Serial.print( pControlParams->ActorInControl()->GetName() );
+            Serial.print( pControlParams->BehaviorInControl()->GetName() );
             Serial.print( F( "] " ) );
             Serial.print( _throttleLeft );
             Serial.print( '/' );
@@ -97,7 +97,7 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
         IF_CSV( MM_CSVBASIC ) {
             CSV_OUT( _throttleLeft );
             CSV_OUT( _throttleRight );
-            CSV_OUT( pControlParams->ActorInControl()->GetName() );
+            CSV_OUT( pControlParams->BehaviorInControl()->GetName() );
         }
     }
 }

@@ -52,7 +52,7 @@ Subscriber* WaypointManager::HandleEvent( EventNotification* pEvent )
                 break;
             case 'M' : // modify a waypoint
                 break;
-            case 'Q' : // query (list waypoints).  Since WaypointManager is not an actor, we have to do this ourselves.
+            case 'Q' : // query (list waypoints).  Since WaypointManager is not a behavior, we have to do this ourselves.
                 PrintParameterValues();
                 break;
             case 'X' : // clear waypoint list

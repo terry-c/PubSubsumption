@@ -20,9 +20,9 @@ Subsumption Architecture as described by David P. Anderson.
 // The Navigator keeps track of the current position and plots a course from this position to the next Waypoint.
 // It has a direct connection to the motors for odometry (encoder tick) data.
 // It can be controlled from the console.
-// It is a Actor so it participates in the Subsumption architecture, generally as a low priority.
+// It is a Behavior so it participates in the Subsumption architecture, generally as a low priority.
 
-class Navigator : public Actor
+class Navigator : public Behavior
 {
 
     enum eNavigatorState {
@@ -38,7 +38,7 @@ class Navigator : public Actor
     // The Subscriber base class has one pointer for this purpose, but since we subscribe to events
     // from two Publishers ( CommandDispatcher and Director ), we need an extra Subscriber
     // pointer to hold the Director chain.
-//    Subscriber* _pNextActor;
+//    Subscriber* _pNextBehavior;
 
     Position*           _pPosition;
     WaypointManager*    _pWaypointManager;

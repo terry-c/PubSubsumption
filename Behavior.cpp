@@ -8,21 +8,21 @@ Written by Terry Crook in collaboration with Clayton Dean, and based upon the
 Subsumption Architecture as described by David P. Anderson.
 */
 
-#include "Actor.h"
+#include "Behavior.h"
 
 
-Actor::Actor( CommandDispatcher* pCD ) : CommandSubscriber( pCD ), _bEnabled( true ), _bCanBeDisabled(true), _messageMask( 1 )
+Behavior::Behavior( CommandDispatcher* pCD ) : CommandSubscriber( pCD ), _bEnabled( true ), _bCanBeDisabled(true), _messageMask( 1 )
 {
 
 }
 
 
-void Actor::SubscribeTo( Publisher* pPub, uint8_t eventID /* = 0 */ )
+void Behavior::SubscribeTo( Publisher* pPub, uint8_t eventID /* = 0 */ )
 {
     if ( pPub ) {
         // subscribing to Director
         if ( eventID == 0 ) {
-            _pNextActor = pPub->Subscribe( static_cast<Subscriber*> (this), eventID );
+            _pNextBehavior = pPub->Subscribe( static_cast<Subscriber*> (this), eventID );
         }
         else {  // subscribing to CommandDispatcher
             // if necessary, we could keep a "next" pointer for each eventID,
@@ -33,10 +33,10 @@ void Actor::SubscribeTo( Publisher* pPub, uint8_t eventID /* = 0 */ )
 }
 
 
-// For an Actor, there are two kinds of events:  Control events from the Director, or
+// For an Behavior, there are two kinds of events:  Control events from the Director, or
 // Command events from the Dispatcher.  Here, we distinguish between the two and
 // route them accordingly.  Also, we handle the common sub-commands.
-Subscriber* Actor::HandleEvent( EventNotification* pEvent ) 
+Subscriber* Behavior::HandleEvent( EventNotification* pEvent ) 
 {
     Subscriber* pReturnSub = NULL;
 
@@ -46,10 +46,10 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
         }
 
         handleControlEvent( pEvent, (ControlParams*) pEvent->pData );
-        pReturnSub = _pNextActor;
+        pReturnSub = _pNextBehavior;
     }
     else {  // CommandDispatcher event
-        // since all Actors have some common functionality, we can handle the common stuff here
+        // since all Behaviors have some common functionality, we can handle the common stuff here
         pReturnSub = _pNextSub;
 
         CommandArgs* pArgs = (CommandArgs*) pEvent->pData;
@@ -102,7 +102,7 @@ Subscriber* Actor::HandleEvent( EventNotification* pEvent )
     return pReturnSub;
 }
 
-void Actor::PrintHelp()
+void Behavior::PrintHelp()
 {
     Serial.print( "\n========\n" );
     PrintParameterValues();
@@ -120,7 +120,7 @@ void Actor::PrintHelp()
 }
 
 
-void Actor::PrintParameterValues()
+void Behavior::PrintParameterValues()
 {
     Serial.print( _pName );
     Serial.print( ": " );
@@ -131,7 +131,7 @@ void Actor::PrintParameterValues()
 }
 
 
-void Actor::PrintSpecificParameterValues()
+void Behavior::PrintSpecificParameterValues()
 {
     Serial.print( F( " No parameter query defined for " ) );
     Serial.println( _pName );

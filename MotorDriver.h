@@ -21,13 +21,13 @@ Subsumption Architecture as described by David P. Anderson.
 // As a CommandHandler, LEDDriver implements the following commands: <<<<< REVISE >>>>>
 // The base (noun) command is "L", followed by optional subcommands and arguments
 // In normal operation, the "L0" and "L1" commands disable and enable the LEDDriver 
-// This is true of all Actor objects.
+// This is true of all Behavior objects.
 // For diagnostic and testing purposes (which is what the LEDDriver is for anyway),
 // the "L <LeftSpeed> <RightSpeed>" command sets the speed
 // of the two "motors".  Reverse direction is indicated by negative speeds.
 // For diagnostic and testing purposes,
 
-class MotorDriver : public Actor
+class MotorDriver : public Behavior
 {
     uint8_t _pwmPinLF, _dirPinLF,
             _pwmPinRF, _dirPinRF,

@@ -18,7 +18,7 @@ MotorDriver::MotorDriver(
     uint8_t pwmPinRF, uint8_t dirPinRF,
     CommandDispatcher* pCD, Position* pOD ) : 
 
-                                                Actor( pCD ),
+                                                Behavior( pCD ),
                                                 _pwmPinLF(pwmPinLF), 
                                                 _pwmPinRF(pwmPinRF), 
                                                 _pwmPinLR(pwmPinLR), 
@@ -72,10 +72,10 @@ void MotorDriver::handleControlEvent( EventNotification* pEvent, ControlParams* 
         digitalWrite( _dirPinRF, bReverseRight ? 1 : 0 );
         digitalWrite( _dirPinRR, bReverseRight ? 1 : 0 );
 
-        // display name of subsuming Actor
-        if ( _messageMask & MM_INFO && pControlParams->ActorInControl() ) {
+        // display name of subsuming Behavior
+        if ( _messageMask & MM_INFO && pControlParams->BehaviorInControl() ) {
             Serial.print( '[' );
-            Serial.print( pControlParams->ActorInControl()->GetName() );
+            Serial.print( pControlParams->BehaviorInControl()->GetName() );
             Serial.print( F( "] " ) );
             Serial.print( _throttleLeft );
             Serial.print( '/' );
