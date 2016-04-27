@@ -49,5 +49,5 @@ public:
     LEDDriver( uint8_t pwmPinLeft, uint8_t pwmPinRight, uint8_t dirPinLeft, uint8_t dirPinRight, CommandDispatcher* pCD, Position* pOD, float ticksPerInch );
     void                Update( void );
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
+    virtual void        handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams );
 };

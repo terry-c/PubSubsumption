@@ -53,5 +53,5 @@ public:
         CommandDispatcher* pCD, Position* pOD);
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
+    virtual void        handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams );
 };

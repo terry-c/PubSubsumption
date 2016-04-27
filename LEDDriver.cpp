@@ -57,22 +57,22 @@ void LEDDriver::Update( void ) {
 }
 
 
-void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
+void LEDDriver::handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams )
 {
     if ( _bEnabled ) {
-        ControlParams* pControlParams = (ControlParams*) pEvent->pData;
+        SubsumptionParams* pSubsumptionParams = (SubsumptionParams*) pEvent->pData;
 
         // don't allow rapid throttle changes
-        _throttleLeft = constrain( pControlParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
-        _throttleRight = constrain( pControlParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
+        _throttleLeft = constrain( pSubsumptionParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
+        _throttleRight = constrain( pSubsumptionParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
 
         SetLED( _throttleLeft, _ledPwmPinLeft, _ledDirPinLeft );
         SetLED( _throttleRight, _ledPwmPinRight, _ledDirPinRight );
 
         // display name of subsuming Behavior, and requested throttle settings
-        if ( _messageMask & MM_INFO && pControlParams->BehaviorInControl() ) {
+        if ( _messageMask & MM_INFO && pSubsumptionParams->ControlFreak() ) {
             Serial.print( '[' );
-            Serial.print( pControlParams->BehaviorInControl()->GetName() );
+            Serial.print( pSubsumptionParams->ControlFreak()->GetName() );
             Serial.print( F( "] " ) );
             Serial.print( _throttleLeft );
             Serial.print( '/' );
@@ -81,7 +81,7 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
 
         // simulate Position update.  Assume full throttle yields 10 IPS, scale to produce encoder ticks per step
         // apply differential ratios to simulate motor/gear/wheel differences in throttle response.
-        float maxTicksPerStep = _ticksPerInch * 10.0 * ( (float) pControlParams->GetInterval() / 1000.0 );
+        float maxTicksPerStep = _ticksPerInch * 10.0 * ( (float) pSubsumptionParams->GetInterval() / 1000.0 );
         _pPosition->_currentEncoderPositionLeft += map( _throttleLeft, 0, 255, 0, maxTicksPerStep ) * _leftRatio;
         _pPosition->_currentEncoderPositionRight += map( _throttleRight, 0, 255, 0, maxTicksPerStep )  * _rightRatio;
 
@@ -97,7 +97,7 @@ void LEDDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pC
         IF_CSV( MM_CSVBASIC ) {
             CSV_OUT( _throttleLeft );
             CSV_OUT( _throttleRight );
-            CSV_OUT( pControlParams->BehaviorInControl()->GetName() );
+            CSV_OUT( pSubsumptionParams->ControlFreak()->GetName() );
         }
     }
 }
@@ -118,7 +118,7 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
                 SetLED( leftSpeed, _ledPwmPinLeft, _ledDirPinLeft );
                 SetLED( rightSpeed, _ledPwmPinRight, _ledDirPinRight );
 
-                IF_MSG( MM_RESPONSES ) {
+                IF_MASK( MM_RESPONSES ) {
                     Serial.print( F( "LED simulator speeds directly set to: " ) );
                     Serial.print( leftSpeed ); Serial.print( '\t' );
                     Serial.println( rightSpeed );
@@ -130,7 +130,7 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
             _leftRatio = pData->fParams[0];
             _rightRatio = pData->fParams[1];
 
-            IF_MSG( MM_RESPONSES ) {
+            IF_MASK( MM_RESPONSES ) {
                 Serial.print( F( "LED simulator throttle/speed ratios set to: " ) );
                 Serial.print( _leftRatio ); Serial.print( '\t' );
                 Serial.println( _rightRatio );
@@ -140,7 +140,7 @@ void LEDDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArg
         case 'L' : // set throttle limit
             _throttleChangeLimit = pData->nParams[0];
 
-            IF_MSG( MM_RESPONSES ) {
+            IF_MASK( MM_RESPONSES ) {
                 Serial.print( F( "LED throttle change limit set to " ) );
                 Serial.println( _throttleChangeLimit );
             }

@@ -13,7 +13,7 @@ This is an experimental framework to explore the Subsumption Architecture.  It d
 Instead, a "token" is passed to each Behavior in priority order.  The first Behavior to take control is the "winner".
 
 The Publisher/Subscriber mechanism is used in two ways in this system.  The core of the system is the Subsumption chain, which is controlled by an object called Director.
-The Director is a Publisher, which sets up the token (called ControlParams) and passes it to its Subscribers, which are the Behaviors.  The ControlParams object contains the Subsumption flag and the throttle settings for left and right motors.
+The Director is a Publisher, which sets up the token (called SubsumptionParams) and passes it to its Subscribers, which are the Behaviors.  The SubsumptionParams object contains the Subsumption flag and the throttle settings for left and right motors.
 At the end of the Subsumption chain (the last subscriber) is the MotorDriver, which applies the throttle values.
 
 The other Publisher in this system is the CommandDispatcher.  Any object in the system which can be controlled subscribes to events from this Publisher.  The CommandDispatcher checks the Serial port for

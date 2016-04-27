@@ -38,7 +38,7 @@ Navigator::Navigator( CommandDispatcher* pCD, Position* pOd, WaypointManager* pW
 
 
 
-void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
+void Navigator::handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams )
 {
     float   headingToWaypoint;
     float   headingError;
@@ -48,7 +48,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
 
         // now, if this event has not already been subsumed, we need to plot a course
         // from our current position to our current waypoint, if any.
-        if ( ! pControlParams->BehaviorInControl() ) {
+        if ( ! pSubsumptionParams->ControlFreak() ) {
             // adjust the motors' speeds as necessary to correct our heading
 
             headingToWaypoint = _pPosition->_theta;   // current heading in radians, in case we don't have a waypoint
@@ -63,18 +63,14 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                 if ( distanceToWaypoint < _pCurrentWaypoint->_radius ) {
                     _pCurrentWaypoint = _pWaypointManager->GetWaypoint( ++_waypointNumber );
                     _bCorrecting = false;
-                    IF_MSG( MM_PROGRESS ) {
-                        Serial.println( F( "\nNext Waypoint\n" ) );
-                    }
+                    PROGRESS_MSG( "\nNext Waypoint\n" );
                     
                     if ( !_pCurrentWaypoint ) {
 
                         // no further waypoints, so shut down and take control
-                        IF_MSG( MM_PROGRESS ) {
-                            Serial.println( F( "\nWe have arrived!\n" ) );
-                        }
+                        PROGRESS_MSG( "\nWe have arrived!\n" );
 
-                        pControlParams->SetThrottles( 0, 0, this);
+                        pSubsumptionParams->SetThrottles( 0, 0, this);
                         _waypointNumber = 0;
                     }
 
@@ -87,21 +83,21 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                     // arguments to get the correct alignment.
                     headingToWaypoint = atan2( dx, dy );
 
-                    IF_MSG( MM_CALC ) {
+                    IF_MASK( MM_CALC ) {
                         PRINT_VAR( dx );
                         PRINT_VAR( dy );
                         PRINT_VAR( headingToWaypoint );
                     }
 
                     headingError = _pPosition->_theta - headingToWaypoint;
-                    IF_MSG( MM_CALC ) {
+                    IF_MASK( MM_CALC ) {
                         PRINT_VAR( headingError );
                     }
                     // normalize the error value
                     float piOffset = headingError < 0.0 ? -PI : PI;
                     headingError = fmod( headingError + piOffset, 2.0 * PI ) - PI;
 //                    headingError = atan( tan( headingError ) );
-                    IF_MSG( MM_CALC ) {
+                    IF_MASK( MM_CALC ) {
                         Serial.print( F("Adjusted ") );
                         PRINT_VAR( headingError );
                     }
@@ -113,9 +109,9 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                         if ( ! _bCorrecting ) { 
                             _bCorrecting = true;
                             // snapshot current throttle positions as a baseline
-                            _leftThrottleSnapshot = pControlParams->GetLeftThrottle();
-                            _rightThrottleSnapshot = pControlParams->GetRightThrottle();
-                            IF_MSG( MM_CALC ) {
+                            _leftThrottleSnapshot = pSubsumptionParams->GetLeftThrottle();
+                            _rightThrottleSnapshot = pSubsumptionParams->GetRightThrottle();
+                            IF_MASK( MM_CALC ) {
                                 PRINT_VAR( _leftThrottleSnapshot );
                                 PRINT_VAR( _rightThrottleSnapshot );
                             }
@@ -125,15 +121,15 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
                         if ( headingError < 0 ) {
                             // map error (0..3) to throttle ( rightsnapshot .. -leftsnapshot )
                             int rightThrottle = fmap( -headingError, 0.0, 3.14, _rightThrottleSnapshot, -_leftThrottleSnapshot );
-                            pControlParams->SetThrottles( _leftThrottleSnapshot, rightThrottle , this);
-                            IF_MSG( MM_CALC ) {
+                            pSubsumptionParams->SetThrottles( _leftThrottleSnapshot, rightThrottle , this);
+                            IF_MASK( MM_CALC ) {
                                 PRINT_VAR( rightThrottle );
                             }
                         }
                         else {
                             int leftThrottle = fmap( headingError, 0.0, 3.14, _leftThrottleSnapshot, -_rightThrottleSnapshot );
-                            pControlParams->SetThrottles( leftThrottle, _rightThrottleSnapshot, this);
-                            IF_MSG( MM_CALC ) {
+                            pSubsumptionParams->SetThrottles( leftThrottle, _rightThrottleSnapshot, this);
+                            IF_MASK( MM_CALC ) {
                                 PRINT_VAR( leftThrottle );
                             }
                         }
@@ -147,10 +143,9 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
             else {
                 // no waypoints, so shut down and take control
 
-                IF_MSG( MM_PROGRESS ) {
-                    Serial.println( F( "Destination reached." ) );
-                }
-                pControlParams->SetThrottles( 0, 0, this);
+                PROGRESS_MSG( "Destination reached." );
+                
+                pSubsumptionParams->SetThrottles( 0, 0, this);
                 _waypointNumber = 0;
             }
         }
@@ -162,7 +157,7 @@ void Navigator::handleControlEvent( EventNotification* pEvent, ControlParams* pC
     IF_CSV( MM_CSVBASIC ) {
         CSV_OUT( _waypointNumber );
 #ifdef USE_CSV
-        if ( _pCurrentWaypoint || ( pControlParams->PrintingCsvHeadings() ) ) {
+        if ( _pCurrentWaypoint || ( pSubsumptionParams->PrintingCsvHeadings() ) ) {
             CSV_OUT( _pCurrentWaypoint->_x );
             CSV_OUT( _pCurrentWaypoint->_y );
         }

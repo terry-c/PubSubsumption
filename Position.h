@@ -24,7 +24,7 @@ Subsumption Architecture as described by David P. Anderson.
 /// One option would be to ignore the "extra" motors and just track one motor on each side.  Another option might be
 /// to average the motors' odemetry data.
 ///
-/// Position is an Behavior, so it participates in the Subsumption chain.  It should be first in the chain, but it will
+/// Position is a Behavior, so it participates in the Subsumption chain.  It should be first in the chain, but it will
 /// never subsume.  Instead, it takes a snapshot of the encoder positions and performs all the calculations to determine
 /// location, orientation, speed, etc.  These values are made available to any subsequent Behavior which needs this information.
 /// This way, all these calculations are performed in one place, at one time, using the position values captured in the
@@ -67,5 +67,5 @@ public:
 
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
+    virtual void        handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams );
 };

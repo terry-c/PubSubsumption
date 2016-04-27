@@ -50,14 +50,14 @@ MotorDriver::MotorDriver(
 }
 
 
-void MotorDriver::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
+void MotorDriver::handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams )
 {
     if ( _bEnabled ) {
-        ControlParams* pControlParams = (ControlParams*) pEvent->pData;
+        SubsumptionParams* pSubsumptionParams = (SubsumptionParams*) pEvent->pData;
 
         // don't allow rapid throttle changes
-        _throttleLeft = constrain( pControlParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
-        _throttleRight = constrain( pControlParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
+        _throttleLeft = constrain( pSubsumptionParams->GetLeftThrottle(), _throttleLeft - _throttleChangeLimit, _throttleLeft + _throttleChangeLimit );
+        _throttleRight = constrain( pSubsumptionParams->GetRightThrottle(), _throttleRight - _throttleChangeLimit, _throttleRight + _throttleChangeLimit );
 
         bool bReverseLeft = _throttleLeft < 0;
         bool bReverseRight = _throttleRight < 0;
@@ -73,9 +73,9 @@ void MotorDriver::handleControlEvent( EventNotification* pEvent, ControlParams* 
         digitalWrite( _dirPinRR, bReverseRight ? 1 : 0 );
 
         // display name of subsuming Behavior
-        if ( _messageMask & MM_INFO && pControlParams->BehaviorInControl() ) {
+        if ( _messageMask & MM_INFO && pSubsumptionParams->ControlFreak() ) {
             Serial.print( '[' );
-            Serial.print( pControlParams->BehaviorInControl()->GetName() );
+            Serial.print( pSubsumptionParams->ControlFreak()->GetName() );
             Serial.print( F( "] " ) );
             Serial.print( _throttleLeft );
             Serial.print( '/' );
@@ -115,7 +115,7 @@ void MotorDriver::handleCommandEvent( EventNotification* pEvent, CommandArgs* pA
         case 'L' : // set throttle limit
             _throttleChangeLimit = pData->nParams[0];
 
-            IF_MSG( MM_RESPONSES ) {
+            IF_MASK( MM_RESPONSES ) {
                 Serial.print( F( "Motor throttle change limit set to " ) );
                 Serial.println( _throttleChangeLimit );
             }

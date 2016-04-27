@@ -56,10 +56,8 @@ void Director::Update()
         }
 
         // add a visual divider at the beginning of the subsumption chain
-        IF_MSG( MM_PROGRESS ) {
-            Serial.println( F( "\n----" ) );
-        }
-
+        PROGRESS_MSG( "\n----" );
+        
         // send the event down the chain
         publish( _pFirstSubscriber, &_notification );
 

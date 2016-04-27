@@ -78,18 +78,19 @@ SimSerial Serial;
 /// Uses the F() macro to print strings directly from Program Memory without using RAM
 #define PRINT_VAR( x ) Serial.print( F( #x " =\t" ) ); Serial.println( x );
 
-#define IF_MSG( MASK ) if ( _messageMask & MASK )
+#define IF_MASK( MASK ) if ( _messageMask & MASK )
+#define PROGRESS_MSG( MSG ) if ( _messageMask & MM_PROGRESS ) Serial.println( F( MSG ) )
 
 #define USE_CSV
 
 #ifdef USE_CSV
 
 /// Determine whether to output CSV headings or data
-#define IF_CSV( MASK ) if ( _messageMask & MASK && pControlParams->PrintingCsv() )
+#define IF_CSV( MASK ) if ( _messageMask & MASK && pSubsumptionParams->PrintingCsv() )
 
 /// Output either heading or data, separated by commas (or other delimiter)
 #define CSV_OUT( VAR ) \
-    if ( pControlParams->PrintingCsvHeadings() ) { \
+    if ( pSubsumptionParams->PrintingCsvHeadings() ) { \
         Serial.print( _pName ); \
         Serial.print( ':' ); \
         Serial.print( F( #VAR ) ); \
@@ -97,7 +98,7 @@ SimSerial Serial;
     else { \
         Serial.print( VAR ); \
     } \
-    Serial.print( pControlParams->GetCsvDelimiter() );
+    Serial.print( pSubsumptionParams->GetCsvDelimiter() );
 #else
 #define IF_CSV( X ) 
 #define CSV_OUT( X )
@@ -114,7 +115,7 @@ SimSerial Serial;
 #define MM_CALC         0x08
 #define MM_INFO         0x10
 #define MM_CSVBASIC     0x20
-#define MM_CSVEXTENDED  0x40
+#define MM_CSVEXTENDED  0x60
 
 
 //template <class T> int EEPROM_writeAnything(int ee, const T& value)

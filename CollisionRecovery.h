@@ -60,7 +60,7 @@ public:
 
 //    virtual Subscriber* HandleEvent( EventNotification* pEvent );
     virtual void    handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void    handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams );
+    virtual void    handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams );
 
     virtual void    PrintSpecificParameterValues();
 };

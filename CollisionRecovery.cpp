@@ -43,9 +43,9 @@ CollisionRecovery::CollisionRecovery( CommandDispatcher* pCD, uint8_t leftPin, u
 }
 
 
-void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
+void CollisionRecovery::handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams )
 {
-    if ( ! pControlParams->BehaviorInControl() ) {
+    if ( ! pSubsumptionParams->ControlFreak() ) {
         bool bInControl = true;
         int leftMotorSpeed = 0;
         int rightMotorSpeed = 0;
@@ -61,9 +61,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlPa
                     rightMotorSpeed = 0;
                     _eState = eStopped;
                     _nStateTimer = _StateTimes[ _eState ] - 1;
-                    if ( _messageMask & MM_PROGRESS ) {
-                        Serial.println( F( "Stopped" ) );
-                    }
+                    PROGRESS_MSG( "Stopped" );
                 }
                 else {
                     // nothing hit, pass for now . . .
@@ -75,9 +73,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlPa
                 if ( --_nStateTimer == 0 ) {
                     _eState = eReversing;
                     _nStateTimer = _StateTimes[ _eState ];
-                    if ( _messageMask & MM_PROGRESS ) {
-                        Serial.println( F( "Reverse" ) );
-                    }
+                    PROGRESS_MSG( "Reverse" );
                 }
                 break;
 
@@ -85,9 +81,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlPa
                 if ( --_nStateTimer == 0 ) {
                     _eState = eTurning;
                     _nStateTimer = _StateTimes[ _eState ];
-                    if ( _messageMask & MM_PROGRESS ) {
-                        Serial.println( F( "Turning" ) );
-                    }
+                    PROGRESS_MSG( "Turning" );
                 }
                 break;
 
@@ -101,9 +95,7 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlPa
                 if ( --_nStateTimer == 0 ) {
                     _eState = eForward;
                     _nStateTimer = _StateTimes[ _eState ];
-                    if ( _messageMask & MM_PROGRESS ) {
-                        Serial.println( F( "Forward" ) );
-                    }
+                    PROGRESS_MSG( "Forward" );
                 }
                 break;
 
@@ -112,15 +104,13 @@ void CollisionRecovery::handleControlEvent( EventNotification* pEvent, ControlPa
                     _eState = eNormal;
                     _bSimBumpLeft = false;
                     _bSimBumpRight = false;
-                    if ( _messageMask & MM_PROGRESS ) {
-                        Serial.println( F( "Done" ) );
-                    }
+                    PROGRESS_MSG( "Done" );
                 }
                 break;
 
         }
         if ( bInControl ) {
-            pControlParams->SetThrottles( leftMotorSpeed, rightMotorSpeed, this );
+            pSubsumptionParams->SetThrottles( leftMotorSpeed, rightMotorSpeed, this );
         }
     }
 }
@@ -134,16 +124,12 @@ void CollisionRecovery::handleCommandEvent( EventNotification* pEvent, CommandAr
             break;
         
         case 'L' : // Simulated Bump left
-            if ( _messageMask & MM_PROGRESS ) {
-                Serial.println("Bump Left!");
-            }
+            PROGRESS_MSG("Bump Left!");
             _bSimBumpLeft = true;
             break;
         
         case 'R' : // Simulated Bump right
-            if ( _messageMask & MM_PROGRESS ) {
-                Serial.println("Bump Right!");
-            }
+            PROGRESS_MSG( "Bump Right!");
             _bSimBumpRight = true;
             break;
 

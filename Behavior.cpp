@@ -33,19 +33,19 @@ void Behavior::SubscribeTo( Publisher* pPub, uint8_t eventID /* = 0 */ )
 }
 
 
-// For an Behavior, there are two kinds of events:  Control events from the Director, or
+// For a Behavior, there are two kinds of events:  Control events from the Director, or
 // Command events from the Dispatcher.  Here, we distinguish between the two and
 // route them accordingly.  Also, we handle the common sub-commands.
 Subscriber* Behavior::HandleEvent( EventNotification* pEvent ) 
 {
     Subscriber* pReturnSub = NULL;
 
-    if ( pEvent->eventID == 0 ) {   // Director event
+    if ( pEvent->eventID == 0 ) {   // Subsumption (Director) event
         if ( _messageMask & MM_ID ) {
             Serial.print( _bEnabled ? '+' : '-' ); Serial.println( _pName );
         }
 
-        handleControlEvent( pEvent, (ControlParams*) pEvent->pData );
+        handleSubsumptionEvent( pEvent, (SubsumptionParams*) pEvent->pData );
         pReturnSub = _pNextBehavior;
     }
     else {  // CommandDispatcher event
@@ -60,7 +60,7 @@ Subscriber* Behavior::HandleEvent( EventNotification* pEvent )
             case '0' : 
                 if ( _bCanBeDisabled ) {
                     _bEnabled = false; 
-                    IF_MSG( MM_RESPONSES ) {
+                    IF_MASK( MM_RESPONSES ) {
                         Serial.print( _pName );
                         Serial.println( F( " disabled." ) );
                     }
@@ -69,7 +69,7 @@ Subscriber* Behavior::HandleEvent( EventNotification* pEvent )
             case '1' : 
                 if ( _bCanBeDisabled ) {
                     _bEnabled = true; 
-                    IF_MSG( MM_RESPONSES ) {
+                    IF_MASK( MM_RESPONSES ) {
                         Serial.print( _pName );
                         Serial.println( F( " enabled." ) );
                     }
@@ -95,6 +95,7 @@ Subscriber* Behavior::HandleEvent( EventNotification* pEvent )
                 Serial.println( _messageMask, HEX );
                 break;
             default: 
+				// not a common Behavior command, pass to the specific Behavior
                 handleCommandEvent( pEvent, pArgs ); 
                 break;
         }

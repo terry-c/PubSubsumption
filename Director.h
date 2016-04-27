@@ -13,11 +13,11 @@ Subsumption Architecture as described by David P. Anderson.
 #include <CommandDispatcher.h>
 #include <Behavior.h>
 
-// ControlParams contains the motor control values which are passed through the Subsumption stack
+// SubsumptionParams contains the motor control values which are passed through the Subsumption stack
 // and end up controlling the motors
-class ControlParams 
+class SubsumptionParams 
 {
-    Behavior*      _pTakenBy;  // pointer to the first subsumption layer which takes control
+    Behavior*   _pTakenBy;  // pointer to the first subsumption layer which takes control
 
     int         _throttleLeft;
     int         _throttleRight;
@@ -32,10 +32,10 @@ class ControlParams
 
 public:
 
-    ControlParams() : _throttleLeft( 0 ), _throttleRight( 0 ), _csvState( eCsvIdle ), _csvDelimiter( '\t' ), _stepIntervalMillis( 1000 ) {};
+    SubsumptionParams() : _throttleLeft( 0 ), _throttleRight( 0 ), _csvState( eCsvIdle ), _csvDelimiter( '\t' ), _stepIntervalMillis( 1000 ) {};
 
     void        ControlledBy( Behavior* pBehavior )     { _pTakenBy = pBehavior; }
-    Behavior*   BehaviorInControl()                     { return _pTakenBy; }
+    Behavior*   ControlFreak()							{ return _pTakenBy; }
 
     void        SetThrottles( int left, int right, Behavior* pBehavior )     { _throttleLeft = left; _throttleRight = right; _pTakenBy = pBehavior; }
     void        SetLeftThrottle( int left )             { _throttleLeft = left; }
@@ -68,8 +68,8 @@ class Director : public Publisher, public Behavior
 //    uint16_t        _intervalMS;
     unsigned long   _tickTimeMS;
 
-    // ControlParams object which is passed to all Behaviors through the Publisher's EventNotification.
-    ControlParams   _controlParams;
+    // SubsumptionParams object which is passed to all Behaviors through the Publisher's EventNotification.
+    SubsumptionParams   _controlParams;
 
 public:
     // interval is the subsumption interval in ms.
@@ -82,6 +82,6 @@ public:
     void Update();
 
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs );
-    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams ) {}  // these would come from the Director
+    virtual void        handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams ) {}  // these would come from the Director
 };
 

@@ -13,7 +13,7 @@ Subsumption Architecture as described by David P. Anderson.
 #include <CommandDispatcher.h>
 #include <CommandSubscriber.h>
 
-class ControlParams;
+class SubsumptionParams;
 
 /// The Behavior class is the base class for all participants in the Subsumption chain.
 ///
@@ -70,7 +70,7 @@ public:
     virtual void        handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs ) = 0;
 
     // handle Director events
-    virtual void        handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams ) = 0;
+    virtual void        handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams ) = 0;
 };
 
 

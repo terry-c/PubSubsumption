@@ -32,17 +32,17 @@ CruiseControl::CruiseControl( CommandDispatcher* pCD, Position* pOD ) : Behavior
 // if we were not already cruising, but have just assumed control (i.e., no other
 // behavior has asserted itself this interval), note the Position readings so 
 // we can maintain our heading by keeping the same differential.
-void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
+void CruiseControl::handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams )
 {
     // nothing to do if we're not enabled
     if ( _bEnabled ) {
-        ControlParams* pControlParams = (ControlParams*) pEvent->pData;
+        SubsumptionParams* pSubsumptionParams = (SubsumptionParams*) pEvent->pData;
 
-        if ( NULL != pControlParams->BehaviorInControl() ) {
+        if ( ! pSubsumptionParams->ControlFreak() ) {
             _bCruising = false;
         }
         else {  // nobody else cares, so it's our turn
-            float targetSpeedInchesPerInterval = ( _targetSpeedIPS * pControlParams->GetInterval() ) / 1000;
+            float targetSpeedInchesPerInterval = ( _targetSpeedIPS * pSubsumptionParams->GetInterval() ) / 1000;
 
             if ( _bCruising ) {    // this means we were already cruising
                 // check our position and calculate error values
@@ -116,7 +116,7 @@ void CruiseControl::handleControlEvent( EventNotification* pEvent, ControlParams
             _idealPositionRight += targetSpeedInchesPerInterval;
 
             // set the throttle positions.
-            pControlParams->SetThrottles( _throttleLeft, _throttleRight, this );
+            pSubsumptionParams->SetThrottles( _throttleLeft, _throttleRight, this );
         }
     }
 }

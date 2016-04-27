@@ -51,7 +51,7 @@ void Position::handleCommandEvent( EventNotification* pEvent, CommandArgs* pArgs
 }
 
 
-void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pControlParams )
+void Position::handleSubsumptionEvent( EventNotification* pEvent, SubsumptionParams* pSubsumptionParams )
 {
     // first, we compute our current position (x, y, theta)
     float dLeftInches = _currentEncoderPositionLeft / _EncoderTicksPerInch - _leftInches;
@@ -67,7 +67,7 @@ void Position::handleControlEvent( EventNotification* pEvent, ControlParams* pCo
     _yInches         += dDistanceInches * cos( _theta );
     _headingDegrees  = _theta * (180.0 / PI);
 
-    IF_MSG( MM_PROGRESS ) {
+    IF_MASK( MM_PROGRESS ) {
         PRINT_VAR( _currentEncoderPositionLeft );
         PRINT_VAR( _currentEncoderPositionRight );
         PRINT_VAR( _leftInches     );
